@@ -1,5 +1,5 @@
 app:
-  name: "Folder2Context"
+  name: "Doc2AI"
   version: "1.0.0"
   debug: false
   host: "0.0.0.0"
@@ -40,6 +40,13 @@ analysis:
   truncate_mode: "head_tail"  # head_only, tail_only, head_tail
   head_lines: 100
   tail_lines: 50
+
+# OCR 配置
+ocr:
+  enabled: true
+  lang: "chi_sim+eng"
+  tesseract_cmd: ""  # 留空则使用系统 PATH 中的 tesseract
+  tessdata_dir: ""   # tessdata 目录路径（可选）
 
 output:
   format: "detailed"  # detailed, compact, minimal

@@ -156,7 +156,10 @@ def process_file(file_path, args):
     # 配置
     config = {
         'max_lines': args.max_lines or 500,
-        'extract_tables': args.extract_tables
+        'extract_tables': args.extract_tables,
+        'use_ocr': True,  # 启用 OCR
+        'ocr_lang': 'chi_sim+eng',
+        'tesseract_cmd': args.tesseract_cmd  # 从命令行参数获取
     }
     
     # 输出路径
@@ -168,13 +171,15 @@ def process_file(file_path, args):
     reader = DocumentReader(config)
     content_info = reader.read_single(file_path)
     
-    # 准备统计
+    # 准备统计 - 修复这里
     file_stat = Path(file_path).stat()
+    file_size_human = _format_size(file_stat.st_size)
+    
     stats = {
         'file_name': Path(file_path).name,
         'file_type': Path(file_path).suffix.lower(),
         'file_size_bytes': file_stat.st_size,
-        'file_size_human': _format_size(file_stat.st_size),
+        'file_size_human': file_size_human,  # 直接使用变量
         'success': content_info.get('content') is not None,
         'metadata': content_info.get('metadata', {})
     }
@@ -237,8 +242,15 @@ def main():
     parser.add_argument("--no-desc", action="store_true", help="不添加 AI 描述")
     parser.add_argument("--extract-tables", action="store_true", 
                         help="提取文档中的表格（DOCX/PDF）")
+    parser.add_argument("--use-ocr", action="store_true", default=True,
+                        help="启用 OCR 识别图片文字（默认: 启用）")
+    parser.add_argument("--no-ocr", action="store_false", dest="use_ocr",
+                        help="禁用 OCR 识别")
+    parser.add_argument("--tesseract-cmd", help="Tesseract 可执行文件路径")
+    parser.add_argument("--tessdata-dir", help="Tesseract tessdata 目录路径")
     
     args = parser.parse_args()
+    # ... 其余代码保持不变
     
     # 检查路径是否存在
     input_path = Path(args.path)

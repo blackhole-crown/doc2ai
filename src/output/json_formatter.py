@@ -1,5 +1,6 @@
 """JSON 格式输出器"""
 
+from pathlib import Path  # 移到文件开头
 from typing import List, Dict, Any
 from datetime import datetime
 
@@ -64,6 +65,3 @@ class JSONFormatter:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
         return f"{size_bytes:.2f} TB"
-
-
-from pathlib import Path
