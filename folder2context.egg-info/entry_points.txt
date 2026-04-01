@@ -1,0 +1,2 @@
+[console_scripts]
+folder2context = src.main:main

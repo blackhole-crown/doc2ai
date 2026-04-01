@@ -1,0 +1,23 @@
+Metadata-Version: 2.4
+Name: doc2ai
+Version: 1.0.0
+Summary: Doc2AI - Convert documents to AI-friendly format
+Author: Your Name
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.8
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: python-multipart
+Requires-Dist: pyyaml
+Requires-Dist: chardet
+Requires-Dist: pydantic
+Requires-Dist: aiofiles
+Requires-Dist: tiktoken
+Requires-Dist: python-docx
+Requires-Dist: PyMuPDF
+Dynamic: author
+Dynamic: classifier
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

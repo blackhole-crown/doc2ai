@@ -1,0 +1,301 @@
+{
+  "metadata": {
+    "project_name": "software",
+    "root_path": "D:\\Mine\\Project\\vscodefile\\Software\\software",
+    "processed_at": "2026-03-26T13:48:53.957523",
+    "version": "1.0.0",
+    "config": {
+      "max_file_size_mb": 10,
+      "exclude_patterns": [
+        ".git",
+        "__pycache__",
+        "node_modules",
+        ".DS_Store",
+        "*.pyc"
+      ],
+      "max_line_count": 500,
+      "truncate_mode": "head_tail"
+    },
+    "ai_description": "你好，这是一个【software】项目，请你来解析这个项目。\n\n项目概览：\n- 项目名称：software\n- 文件总数：7 个\n- 项目大小：44.75 KB\n- 主要文件类型：.py (7个)\n\n请帮我分析这个项目的结构、主要功能和代码质量。\n如果有需要改进的地方，也请告诉我。\n\n以下是项目的完整结构和文件内容："
+  },
+  "statistics": {
+    "total_files": 7,
+    "total_size_bytes": 45828,
+    "total_size_human": "44.75 KB",
+    "skipped_files": 1,
+    "file_types": {
+      ".py": 7
+    }
+  },
+  "tree": {
+    "name": "software",
+    "type": "directory",
+    "path": "",
+    "children": [
+      {
+        "name": "bin",
+        "type": "directory",
+        "path": "bin",
+        "children": [
+          {
+            "name": "crawler2-json.py",
+            "type": "file",
+            "path": "bin\\crawler2-json.py",
+            "extension": ".py",
+            "size_bytes": 8183,
+            "size_human": "7.99 KB",
+            "modified": "2026-03-17T16:55:43.702082",
+            "is_symlink": false
+          },
+          {
+            "name": "crawler2-multi.py",
+            "type": "file",
+            "path": "bin\\crawler2-multi.py",
+            "extension": ".py",
+            "size_bytes": 4372,
+            "size_human": "4.27 KB",
+            "modified": "2026-03-17T14:46:52.270060",
+            "is_symlink": false
+          },
+          {
+            "name": "crawler2.py",
+            "type": "file",
+            "path": "bin\\crawler2.py",
+            "extension": ".py",
+            "size_bytes": 2661,
+            "size_human": "2.60 KB",
+            "modified": "2026-03-17T14:36:08.969709",
+            "is_symlink": false
+          },
+          {
+            "name": "news_crawler.py",
+            "type": "file",
+            "path": "bin\\news_crawler.py",
+            "extension": ".py",
+            "size_bytes": 8183,
+            "size_human": "7.99 KB",
+            "modified": "2026-03-17T16:55:43.702082",
+            "is_symlink": false
+          }
+        ]
+      },
+      {
+        "name": "crawler.py",
+        "type": "file",
+        "path": "crawler.py",
+        "extension": ".py",
+        "size_bytes": 9214,
+        "size_human": "9.00 KB",
+        "modified": "2026-03-17T20:36:35.022594",
+        "is_symlink": false
+      },
+      {
+        "name": "crawler_test.py",
+        "type": "file",
+        "path": "crawler_test.py",
+        "extension": ".py",
+        "size_bytes": 13215,
+        "size_human": "12.91 KB",
+        "modified": "2026-03-17T21:01:23.097957",
+        "is_symlink": false
+      },
+      {
+        "name": "login.py",
+        "type": "file",
+        "path": "login.py",
+        "extension": ".py",
+        "size_bytes": 0,
+        "size_human": "0.00 B",
+        "modified": "2026-03-16T22:13:41.384105",
+        "is_symlink": false
+      }
+    ]
+  },
+  "files": [
+    {
+      "file_info": {
+        "path": "bin\\crawler2-json.py",
+        "name": "crawler2-json.py",
+        "extension": ".py",
+        "size_bytes": 8183,
+        "size_human": "7.99 KB",
+        "modified": "2026-03-17T16:55:43.702082",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "import requests\nfrom lxml import etree\nimport time\nimport json\nimport os\nfrom urllib.parse import urljoin\n\n# é…�ç½®é¡¹\nLINK_FEATURE = \"/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\"\nBASE_URL = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\nHEADERS = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n    \"Accept-Language\": \"zh-CN,zh;q=0.9,en;q=0.8\",\n    \"X-Requested-With\": \"XMLHttpRequest\"\n}\n\n# å…¨å±€å�˜é‡�\nJSONL_FILE = \"äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯_å®Œæ•´æ•°æ�®.jsonl\"\ntitle_duplicate_set = set()  # æ ‡é¢˜æŸ¥é‡�é›†å�ˆ\ncurrent_auto_id = 1          # è‡ªå¢�IDè®¡æ•°å™¨ï¼ˆæ ¸å¿ƒï¼šä»�1å¼€å§‹ï¼‰\n\ndef load_existing_data():\n    \"\"\"åŠ è½½å�†å�²æ•°æ�®ï¼šæ�¢å¤�æ ‡é¢˜æŸ¥é‡�é›†å�ˆ + åˆ�å§‹åŒ–è‡ªå¢�ID\"\"\"\n    global current_auto_id, title_duplicate_set\n    if os.path.exists(JSONL_FILE):\n        try:\n            max_id = 0\n            with open(JSONL_FILE, \"r\", encoding=\"utf-8\") as f:\n                for line in f:\n                    line = line.strip()\n                    if line:\n                        data = json.loads(line)\n                        # 1. è®°å½•æ‰€æœ‰æ ‡é¢˜ï¼ˆæŸ¥é‡�ï¼‰\n                        if \"title\" in data:\n                            title_duplicate_set.add(data[\"title\"])\n                        # 2. æ‰¾åˆ°æœ€å¤§IDï¼Œä½œä¸ºä¸‹ä¸€ä¸ªIDçš„èµ·å§‹å€¼\n                        if \"id\" in data and isinstance(data[\"id\"], int):\n                            if data[\"id\"] > max_id:\n                                max_id = data[\"id\"]\n            # è‡ªå¢�IDä»�æœ€å¤§ID+1å¼€å§‹\n            current_auto_id = max_id + 1\n            print(f\"âœ… åŠ è½½å�†å�²æ•°æ�®å®Œæˆ�\")\n            print(f\"   - å�†å�²ä¸�é‡�å¤�æ ‡é¢˜æ•°ï¼š{len(title_duplicate_set)}\")\n            print(f\"   - ä¸‹ä¸€ä¸ªè‡ªå¢�IDï¼š{current_auto_id}\")\n        except Exception as e:\n            print(f\"âš ï¸� åŠ è½½å�†å�²æ•°æ�®å¤±è´¥ï¼š{e}ï¼Œå°†ä»�ID=1å¼€å§‹é‡�æ–°çˆ¬å�–\")\n            current_auto_id = 1\n            title_duplicate_set = set()\n    else:\n        print(f\"â„¹ï¸� æ— å�†å�²æ•°æ�®ï¼Œä»�ID=1å¼€å§‹çˆ¬å�–\")\n\ndef extract_page_data(html_text, page_num):\n    \"\"\"æ��å�–å�•é¡µæ•°æ�®ï¼šè‡ªå¢�ID + æ ‡é¢˜æŸ¥é‡�\"\"\"\n    global current_auto_id\n    html = etree.HTML(html_text)\n    \n    all_a = html.xpath(f\"//a[contains(@href, '{LINK_FEATURE}') and @class='aa_lan_2']\")\n    all_dates = html.xpath(\"//td[@class='zhaopin-title']/following-sibling::td[1]/text()\")\n    \n    print(f\"\\nğŸ”� ç¬¬{page_num}é¡µï¼šåŒ¹é…�åˆ° {len(all_a)} ä¸ªé“¾æ�¥ï¼Œ{len(all_dates)} ä¸ªæ—¶é—´\")\n    page_new_data = []\n    page_count = 0\n    \n    for i in range(min(len(all_a), len(all_dates))):\n        a_node = all_a[i]\n        title = a_node.text.strip() if a_node.text else f\"æ— æ ‡é¢˜_{page_num}_{i+1}\"\n        link = a_node.get(\"href\", \"\").strip()\n        publish_time = all_dates[i].strip()\n        \n        # 1. æ ‡é¢˜æŸ¥é‡�ï¼šè·³è¿‡é‡�å¤�å†…å®¹\n        if title in title_duplicate_set:\n            print(f\"â�­ï¸� è·³è¿‡é‡�å¤�æ ‡é¢˜ï¼ˆID={current_auto_id}ï¼‰ï¼š{title[:30]}...\")\n            continue\n        \n        # 2. æ•°æ�®æ ¡éªŒ\n        if title and link and len(publish_time) == 10:\n            news_item = {\n                \"id\": current_auto_id,  # è‡ªå¢�IDï¼ˆæ ¸å¿ƒä¿®æ”¹ï¼‰\n                \"page\": page_num,       # ä¿�ç•™é¡µç �ï¼ˆå�¯é€‰ï¼Œä¾¿äº�æº¯æº�ï¼‰\n                \"title\": title,\n                \"link\": link,\n                \"publish_time\": publish_time\n            }\n            page_new_data.append(news_item)\n            title_duplicate_set.add(title)\n            current_auto_id += 1  # IDè‡ªå¢�\n            page_count += 1\n    \n    print(f\"âœ… ç¬¬{page_num}é¡µï¼šæ–°å¢� {page_count} æ�¡ä¸�é‡�å¤�æ•°æ�®ï¼ˆå½“å‰�æœ€å¤§ID={current_auto_id-1}ï¼‰\")\n    return page_new_data, len(all_a) > 0\n\ndef crawl_dynamic_pages():\n    \"\"\"æ¨¡æ‹ŸJSç¿»é¡µçˆ¬å�–æ‰€æœ‰æ•°æ�®\"\"\"\n    session = requests.Session()\n    all_new_data = []\n    current_page = 1\n    has_next_page = True\n    \n    # çˆ¬å�–ç¬¬ä¸€é¡µ\n    print(f\"\\nğŸš€ å¼€å§‹çˆ¬å�–ç¬¬ {current_page} é¡µï¼ˆåˆ�å§‹é¡µï¼‰\")\n    response = session.get(BASE_URL, headers=HEADERS, timeout=15, verify=False)\n    response.encoding = \"utf-8\"\n    page_data, has_data = extract_page_data(response.text, current_page)\n    all_new_data.extend(page_data)\n    \n    # å¾ªç�¯çˆ¬å�–ä¸‹ä¸€é¡µ\n    while has_next_page and has_data:\n        current_page += 1\n        print(f\"\\nğŸ“� æ¨¡æ‹Ÿç‚¹å‡»ä¸‹ä¸€é¡µï¼Œçˆ¬å�–ç¬¬ {current_page} é¡µ\")\n        next_page_url = f\"{BASE_URL}?p={current_page}&pageSize=15\"\n        \n        try:\n            time.sleep(2)  # æ¨¡æ‹Ÿäººç±»ç¿»é¡µå»¶è¿Ÿ\n            response = session.get(next_page_url, headers=HEADERS, timeout=15, verify=False)\n            response.raise_for_status()\n            response.encoding = \"utf-8\"\n            \n            page_data, has_data = extract_page_data(response.text, current_page)\n            all_new_data.extend(page_data)\n            \n            # æ— æ–°æ•°æ�®åˆ™å�œæ­¢ç¿»é¡µ\n            if len(page_data) == 0:\n                has_next_page = False\n                print(f\"ğŸ“Œ ç¬¬{current_page}é¡µæ— æ–°æ•°æ�®ï¼Œå·²çˆ¬å�–åˆ°æœ€å��ä¸€é¡µ\")\n                \n            time.sleep(0.5)  # éš�æœºå°�å»¶è¿Ÿ\n            \n        except Exception as e:\n            print(f\"â�Œ ç¬¬{current_page}é¡µçˆ¬å�–å¤±è´¥ï¼š{str(e)[:100]}\")\n            time.sleep(3)\n            try:\n                response = session.get(next_page_url, headers=HEADERS, timeout=15, verify=False)\n                page_data, has_data = extract_page_data(response.text, current_page)\n                all_new_data.extend(page_data)\n            except:\n                has_next_page = False\n                print(f\"ğŸ“Œ ç¬¬{current_page}é¡µé‡�è¯•å¤±è´¥ï¼Œå�œæ­¢ç¿»é¡µ\")\n    \n    return all_new_data\n\ndef save_to_jsonl(new_data):\n    \"\"\"ä¿�å­˜æ•°æ�®ï¼šå�ˆå¹¶å�†å�²+æ–°å¢�ï¼Œä¿�è¯�IDè¿�ç»­ä¸”ä¸�é‡�å¤�\"\"\"\n    # 1. è¯»å�–å�†å�²æ•°æ�®\n    history_data = []\n    if os.path.exists(JSONL_FILE):\n        try:\n            with open(JSONL_FILE, \"r\", encoding=\"utf-8\") as f:\n                for line in f:\n                    line = line.strip()\n                    if line:\n                        history_data.append(json.loads(line))\n        except Exception as e:\n            print(f\"âš ï¸� è¯»å�–å�†å�²æ•°æ�®å¤±è´¥ï¼š{e}ï¼Œå°†è¦†ç›–å�Ÿæœ‰æ–‡ä»¶\")\n            history_data = []\n    \n    # 2. å�ˆå¹¶æ•°æ�®ï¼ˆå�†å�²+æ–°å¢�ï¼‰\n    all_data = history_data + new_data\n    \n    # 3. æœ€ç»ˆå�»é‡�ï¼ˆæŒ‰æ ‡é¢˜ï¼‰+ æŒ‰IDæ�’åº�\n    unique_data = []\n    unique_titles = set()\n    for item in all_data:\n        if item[\"title\"] not in unique_titles:\n            unique_titles.add(item[\"title\"])\n            unique_data.append(item)\n    # æŒ‰IDå�‡åº�æ�’åˆ—ï¼Œä¿�è¯�é¡ºåº�ä¸€è‡´\n    unique_data.sort(key=lambda x: x[\"id\"])\n    \n    # 4. å†™å…¥æ–‡ä»¶\n    try:\n        with open(JSONL_FILE, \"w\", encoding=\"utf-8\") as f:\n            for item in unique_data:\n                json_line = json.dumps(item, ensure_ascii=False)\n                f.write(json_line + \"\\n\")\n        \n        print(f\"\\nğŸ“„ JSONLæ–‡ä»¶ä¿�å­˜æˆ�åŠŸï¼�\")\n        print(f\"ğŸ“� æ–‡ä»¶è·¯å¾„ï¼š{os.path.abspath(JSONL_FILE)}\")\n        print(f\"ğŸ“ˆ æ€»è®¡æ•°æ�®ï¼š{len(unique_data)} æ�¡ï¼ˆIDèŒƒå›´ï¼š1~{unique_data[-1]['id']}ï¼‰\")\n        print(f\"ğŸ”� æœ¬æ¬¡æ–°å¢�ï¼š{len(new_data)} æ�¡\")\n    except PermissionError:\n        print(f\"\\nâ�Œ æ�ƒé™�ä¸�è¶³ï¼�è¯·å…³é—­æ‰“å¼€çš„ {JSONL_FILE} æ–‡ä»¶å��é‡�è¯•\")\n    except Exception as e:\n        print(f\"\\nâ�Œ ä¿�å­˜å¤±è´¥ï¼š{str(e)}\")\n\nif __name__ == \"__main__\":\n    print(\"ğŸš€ å¼€å§‹çˆ¬å�–äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯ï¼ˆè‡ªå¢�ID+å…¨å±€æŸ¥é‡�+åŠ¨æ€�ç¿»é¡µï¼‰\")\n    # æ­¥éª¤1ï¼šåŠ è½½å�†å�²æ•°æ�®ï¼Œåˆ�å§‹åŒ–è‡ªå¢�ID\n    load_existing_data()\n    # æ­¥éª¤2ï¼šåŠ¨æ€�ç¿»é¡µçˆ¬å�–æ–°æ•°æ�®\n    new_data = crawl_dynamic_pages()\n    # æ­¥éª¤3ï¼šä¿�å­˜æ•°æ�®ï¼ˆå�ˆå¹¶å�†å�²+æ–°å¢�ï¼‰\n    save_to_jsonl(new_data)\n    print(\"\\nğŸ�‰ çˆ¬å�–ä»»åŠ¡å…¨éƒ¨å®Œæˆ�ï¼�\")",
+        "preview": "import requests\nfrom lxml import etree\nimport time\nimport json\nimport os\nfrom urllib.parse import urljoin\n\n# é…�ç½®é¡¹\nLINK_FEATURE = \"/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\"\nBASE_URL = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\nHEADERS = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0....",
+        "start_line": 1,
+        "end_line": 195
+      },
+      "metadata": {
+        "hash": "a58139d0",
+        "encoding": "Windows-1254",
+        "line_count": 195,
+        "truncated": false
+      },
+      "analysis": {
+        "language": "python"
+      }
+    },
+    {
+      "file_info": {
+        "path": "bin\\crawler2-multi.py",
+        "name": "crawler2-multi.py",
+        "extension": ".py",
+        "size_bytes": 4372,
+        "size_human": "4.27 KB",
+        "modified": "2026-03-17T14:46:52.270060",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "import requests\nfrom lxml import etree\nimport time\nimport csv\nfrom urllib.parse import urljoin\n\n# åŒ¹é…�ä½ æ��ä¾›çš„é“¾æ�¥ç‰¹å¾�ï¼š/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\nLINK_FEATURE = \"/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\"\nBASE_URL = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\nHEADERS = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n    \"Accept-Language\": \"zh-CN,zh;q=0.9,en;q=0.8\"\n}\n\nall_news = []\n\ndef get_page_data(page_num):\n    \"\"\"çˆ¬å�–æŒ‡å®šé¡µç �çš„æ‰€æœ‰æ‹›è�˜ä¿¡æ�¯\"\"\"\n    try:\n        # æ‹¼æ�¥åˆ†é¡µURL\n        page_url = f\"{BASE_URL}?page={page_num}\" if page_num > 1 else BASE_URL\n        print(f\"\\nğŸ”� æ­£åœ¨çˆ¬å�–ç¬¬ {page_num} é¡µï¼š{page_url}\")\n        \n        # å�‘é€�è¯·æ±‚\n        response = requests.get(page_url, headers=HEADERS, timeout=15, verify=False)\n        response.raise_for_status()  # æ£€æµ‹HTTPé”™è¯¯\n        response.encoding = \"utf-8\"  # å¼ºåˆ¶UTF-8ç¼–ç �\n        html = etree.HTML(response.text)\n        \n        # 1. ç²¾å‡†åŒ¹é…�æ‰€æœ‰æ‹›è�˜é“¾æ�¥ï¼ˆä½¿ç”¨ä½ æ��ä¾›çš„ç‰¹å¾�ï¼‰\n        all_a = html.xpath(f\"//a[contains(@href, '{LINK_FEATURE}') and @class='aa_lan_2']\")\n        # 2. ç²¾å‡†åŒ¹é…�æ‰€æœ‰å�‘å¸ƒæ—¶é—´ï¼ˆzhaopin-titleå�Œçº§åˆ«tdçš„ä¸‹ä¸€ä¸ªtdï¼‰\n        all_dates = html.xpath(\"//td[@class='zhaopin-title']/following-sibling::td[1]/text()\")\n        \n        print(f\"ğŸ”� åŒ¹é…�åˆ° {len(all_a)} ä¸ªæ‹›è�˜é“¾æ�¥ï¼Œ{len(all_dates)} ä¸ªå�‘å¸ƒæ—¶é—´\")\n        \n        page_count = 0\n        # ä¸€ä¸€å¯¹åº”æ��å�–æ•°æ�®\n        for i in range(min(len(all_a), len(all_dates))):\n            a_node = all_a[i]\n            # æ��å�–æ ‡é¢˜\n            title = a_node.text.strip() if a_node.text else f\"æ— æ ‡é¢˜_{page_num}_{i+1}\"\n            # æ��å�–é“¾æ�¥ï¼ˆå·²æ˜¯å®Œæ•´é“¾æ�¥ï¼Œæ— éœ€è¡¥å…¨ï¼‰\n            link = a_node.get(\"href\", \"\").strip()\n            # æ��å�–å�‘å¸ƒæ—¶é—´å¹¶æ¸…ç�†ç©ºæ ¼\n            publish_time = all_dates[i].strip()\n            \n            # è¿‡æ»¤æ— æ•ˆæ•°æ�®\n            if title and link and len(publish_time) == 10:\n                all_news.append({\n                    \"page\": page_num,\n                    \"title\": title,\n                    \"link\": link,\n                    \"publish_time\": publish_time\n                })\n                page_count += 1\n        \n        print(f\"âœ… ç¬¬{page_num}é¡µæˆ�åŠŸæ��å�– {page_count} æ�¡æœ‰æ•ˆæ•°æ�®\")\n        return page_count\n\n    except Exception as e:\n        print(f\"â�Œ ç¬¬{page_num}é¡µçˆ¬å�–å¤±è´¥ï¼š{str(e)[:150]}\")\n        return 0\n\ndef save_to_csv():\n    \"\"\"å°†æ‰€æœ‰æ•°æ�®ä¿�å­˜ä¸ºCSVæ–‡ä»¶ï¼ˆExcelå�¯ç›´æ�¥æ‰“å¼€ï¼‰\"\"\"\n    if not all_news:\n        print(\"â�Œ æ— æœ‰æ•ˆæ•°æ�®å�¯ä¿�å­˜\")\n        return\n    \n    # æ•°æ�®å�»é‡�ï¼ˆæ ¹æ�®æ ‡é¢˜+é“¾æ�¥å”¯ä¸€æ ‡è¯†ï¼‰\n    unique_news = []\n    seen_keys = set()\n    for news in all_news:\n        unique_key = (news[\"title\"], news[\"link\"])\n        if unique_key not in seen_keys:\n            seen_keys.add(unique_key)\n            unique_news.append(news)\n    \n    # ä¿�å­˜CSV\n    filename = \"äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯_å®Œæ•´æ•°æ�®.csv\"\n    with open(filename, \"w\", encoding=\"utf-8-sig\", newline=\"\") as csv_file:\n        fieldnames = [\"page\", \"title\", \"link\", \"publish_time\"]\n        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)\n        writer.writeheader()\n        writer.writerows(unique_news)\n    \n    print(f\"\\nğŸ“Š æ•°æ�®ä¿�å­˜å®Œæˆ�ï¼�\")\n    print(f\"ğŸ“� æ–‡ä»¶å��ï¼š{filename}\")\n    print(f\"ğŸ“ˆ æ€»æ•°æ�®é‡�ï¼š{len(unique_news)} æ�¡ï¼ˆå�»é‡�å��ï¼‰\")\n    print(f\"ğŸ”� å�Ÿå§‹æ•°æ�®é‡�ï¼š{len(all_news)} æ�¡\")\n\nif __name__ == \"__main__\":\n    print(\"ğŸš€ å¼€å§‹çˆ¬å�–äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯...\")\n    # ========== å�¯è‡ªå®šä¹‰çˆ¬å�–é¡µæ•° ==========\n    # ç¤ºä¾‹ï¼šçˆ¬å�–å‰�3é¡µ â†’ range(1, 4)ï¼›çˆ¬å�–å…¨éƒ¨å�¯å…ˆè¯•range(1, 10)\n    total_pages = 3  # å…ˆçˆ¬å‰�3é¡µï¼Œå�¯è‡ªè¡Œä¿®æ”¹\n    # =====================================\n    for page in range(1, total_pages + 1):\n        get_page_data(page)\n        time.sleep(1)  # æ¯�é¡µé—´éš”1ç§’ï¼Œé˜²å��çˆ¬\n    \n    # ä¿�å­˜æ•°æ�®\n    save_to_csv()\n    print(\"\\nğŸ�‰ çˆ¬å�–ä»»åŠ¡å…¨éƒ¨å®Œæˆ�ï¼�\")",
+        "preview": "import requests\nfrom lxml import etree\nimport time\nimport csv\nfrom urllib.parse import urljoin\n\n# åŒ¹é…�ä½ æ��ä¾›çš„é“¾æ�¥ç‰¹å¾�ï¼š/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\nLINK_FEATURE = \"/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\"\nBASE_URL = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\nHEADERS = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text...",
+        "start_line": 1,
+        "end_line": 107
+      },
+      "metadata": {
+        "hash": "da5101db",
+        "encoding": "Windows-1254",
+        "line_count": 107,
+        "truncated": false
+      },
+      "analysis": {
+        "language": "python"
+      }
+    },
+    {
+      "file_info": {
+        "path": "bin\\crawler2.py",
+        "name": "crawler2.py",
+        "extension": ".py",
+        "size_bytes": 2661,
+        "size_human": "2.60 KB",
+        "modified": "2026-03-17T14:36:08.969709",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "import requests\nfrom lxml import etree\nimport time\nimport csv\n\n# å�ªèƒ½çˆ¬å�–å�•æ�¡\n\n# ç›®æ ‡URL\nurl = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\n\n# è¯·æ±‚å¤´ï¼ˆæ¨¡æ‹Ÿæµ�è§ˆå™¨ï¼‰\nheaders = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n    \"Accept-Language\": \"zh-CN,zh;q=0.9,en;q=0.8\"\n}\n\ntry:\n    # å�‘é€�è¯·æ±‚\n    response = requests.get(url, headers=headers, timeout=10)\n    response.raise_for_status()\n    response.encoding = \"utf-8\"\n\n    # è§£æ��HTML\n    html = etree.HTML(response.text)\n\n    # 1. æ��å�–æ‰€æœ‰æ ‡é¢˜å’Œé“¾æ�¥ï¼ˆä½¿ç”¨ä½ æ��ä¾›çš„XPathï¼‰\n    title_xpath = \"/html/body/div[1]/div[3]/div[1]/div[3]/div[1]/div/div/div/table[1]/tbody/tr/td[2]/a\"\n    title_nodes = html.xpath(title_xpath)\n\n    # 2. æ��å�–æ‰€æœ‰å�‘å¸ƒæ—¶é—´ï¼ˆå¯¹åº”td[3]ï¼‰\n    time_xpath = \"/html/body/div[1]/div[3]/div[1]/div[3]/div[1]/div/div/div/table[1]/tbody/tr/td[3]\"\n    time_nodes = html.xpath(time_xpath)\n\n    # 3. ç»„è£…æ•°æ�®\n    news_list = []\n    for title_node, time_node in zip(title_nodes, time_nodes):\n        title = title_node.text.strip()\n        link = title_node.get(\"href\")\n        # è¡¥å…¨é“¾æ�¥\n        if link.startswith(\"/\"):\n            link = \"http://job.mohrss.gov.cn\" + link\n        publish_time = time_node.text.strip()\n\n        news_list.append({\n            \"title\": title,\n            \"link\": link,\n            \"publish_time\": publish_time\n        })\n\n    # è¾“å‡ºç»“æ�œ\n    if not news_list:\n        print(\"â�Œ æœªæ��å�–åˆ°æ•°æ�®ï¼Œè¯·æ£€æŸ¥XPathæˆ–ç½‘é¡µç»“æ�„\")\n    else:\n        print(f\"âœ… æˆ�åŠŸæ��å�– {len(news_list)} æ�¡æ•°æ�®ï¼š\")\n        print(\"-\" * 80)\n        for idx, news in enumerate(news_list, 1):\n            print(f\"ã€�{idx}ã€‘{news['title']}\")\n            print(f\"é“¾æ�¥ï¼š{news['link']}\")\n            print(f\"å�‘å¸ƒæ—¶é—´ï¼š{news['publish_time']}\")\n            print(\"-\" * 80)\n            time.sleep(0.1)\n\n        # ä¿�å­˜ä¸ºCSV\n        with open(\"äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯.csv\", \"w\", encoding=\"utf-8-sig\", newline=\"\") as f:\n            writer = csv.DictWriter(f, fieldnames=[\"title\", \"link\", \"publish_time\"])\n            writer.writeheader()\n            writer.writerows(news_list)\n        print(\"ğŸ“„ æ•°æ�®å·²ä¿�å­˜ä¸ºã€Œäº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯.csvã€�\")\n\nexcept requests.exceptions.RequestException as e:\n    print(f\"â�Œ è¯·æ±‚å¤±è´¥ï¼š{e}\")\nexcept Exception as e:\n    print(f\"â�Œ è§£æ��å¤±è´¥ï¼š{e}\")",
+        "preview": "import requests\nfrom lxml import etree\nimport time\nimport csv\n\n# å�ªèƒ½çˆ¬å�–å�•æ�¡\n\n# ç›®æ ‡URL\nurl = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\n\n# è¯·æ±‚å¤´ï¼ˆæ¨¡æ‹Ÿæµ�è§ˆå™¨ï¼‰\nheaders = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n    \"Accept-Language\"...",
+        "start_line": 1,
+        "end_line": 75
+      },
+      "metadata": {
+        "hash": "6db5dd1b",
+        "encoding": "Windows-1254",
+        "line_count": 75,
+        "truncated": false
+      },
+      "analysis": {
+        "language": "python"
+      }
+    },
+    {
+      "file_info": {
+        "path": "bin\\news_crawler.py",
+        "name": "news_crawler.py",
+        "extension": ".py",
+        "size_bytes": 8183,
+        "size_human": "7.99 KB",
+        "modified": "2026-03-17T16:55:43.702082",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "import requests\nfrom lxml import etree\nimport time\nimport json\nimport os\nfrom urllib.parse import urljoin\n\n# é…�ç½®é¡¹\nLINK_FEATURE = \"/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\"\nBASE_URL = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\nHEADERS = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n    \"Accept-Language\": \"zh-CN,zh;q=0.9,en;q=0.8\",\n    \"X-Requested-With\": \"XMLHttpRequest\"\n}\n\n# å…¨å±€å�˜é‡�\nJSONL_FILE = \"äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯_å®Œæ•´æ•°æ�®.jsonl\"\ntitle_duplicate_set = set()  # æ ‡é¢˜æŸ¥é‡�é›†å�ˆ\ncurrent_auto_id = 1          # è‡ªå¢�IDè®¡æ•°å™¨ï¼ˆæ ¸å¿ƒï¼šä»�1å¼€å§‹ï¼‰\n\ndef load_existing_data():\n    \"\"\"åŠ è½½å�†å�²æ•°æ�®ï¼šæ�¢å¤�æ ‡é¢˜æŸ¥é‡�é›†å�ˆ + åˆ�å§‹åŒ–è‡ªå¢�ID\"\"\"\n    global current_auto_id, title_duplicate_set\n    if os.path.exists(JSONL_FILE):\n        try:\n            max_id = 0\n            with open(JSONL_FILE, \"r\", encoding=\"utf-8\") as f:\n                for line in f:\n                    line = line.strip()\n                    if line:\n                        data = json.loads(line)\n                        # 1. è®°å½•æ‰€æœ‰æ ‡é¢˜ï¼ˆæŸ¥é‡�ï¼‰\n                        if \"title\" in data:\n                            title_duplicate_set.add(data[\"title\"])\n                        # 2. æ‰¾åˆ°æœ€å¤§IDï¼Œä½œä¸ºä¸‹ä¸€ä¸ªIDçš„èµ·å§‹å€¼\n                        if \"id\" in data and isinstance(data[\"id\"], int):\n                            if data[\"id\"] > max_id:\n                                max_id = data[\"id\"]\n            # è‡ªå¢�IDä»�æœ€å¤§ID+1å¼€å§‹\n            current_auto_id = max_id + 1\n            print(f\"âœ… åŠ è½½å�†å�²æ•°æ�®å®Œæˆ�\")\n            print(f\"   - å�†å�²ä¸�é‡�å¤�æ ‡é¢˜æ•°ï¼š{len(title_duplicate_set)}\")\n            print(f\"   - ä¸‹ä¸€ä¸ªè‡ªå¢�IDï¼š{current_auto_id}\")\n        except Exception as e:\n            print(f\"âš ï¸� åŠ è½½å�†å�²æ•°æ�®å¤±è´¥ï¼š{e}ï¼Œå°†ä»�ID=1å¼€å§‹é‡�æ–°çˆ¬å�–\")\n            current_auto_id = 1\n            title_duplicate_set = set()\n    else:\n        print(f\"â„¹ï¸� æ— å�†å�²æ•°æ�®ï¼Œä»�ID=1å¼€å§‹çˆ¬å�–\")\n\ndef extract_page_data(html_text, page_num):\n    \"\"\"æ��å�–å�•é¡µæ•°æ�®ï¼šè‡ªå¢�ID + æ ‡é¢˜æŸ¥é‡�\"\"\"\n    global current_auto_id\n    html = etree.HTML(html_text)\n    \n    all_a = html.xpath(f\"//a[contains(@href, '{LINK_FEATURE}') and @class='aa_lan_2']\")\n    all_dates = html.xpath(\"//td[@class='zhaopin-title']/following-sibling::td[1]/text()\")\n    \n    print(f\"\\nğŸ”� ç¬¬{page_num}é¡µï¼šåŒ¹é…�åˆ° {len(all_a)} ä¸ªé“¾æ�¥ï¼Œ{len(all_dates)} ä¸ªæ—¶é—´\")\n    page_new_data = []\n    page_count = 0\n    \n    for i in range(min(len(all_a), len(all_dates))):\n        a_node = all_a[i]\n        title = a_node.text.strip() if a_node.text else f\"æ— æ ‡é¢˜_{page_num}_{i+1}\"\n        link = a_node.get(\"href\", \"\").strip()\n        publish_time = all_dates[i].strip()\n        \n        # 1. æ ‡é¢˜æŸ¥é‡�ï¼šè·³è¿‡é‡�å¤�å†…å®¹\n        if title in title_duplicate_set:\n            print(f\"â�­ï¸� è·³è¿‡é‡�å¤�æ ‡é¢˜ï¼ˆID={current_auto_id}ï¼‰ï¼š{title[:30]}...\")\n            continue\n        \n        # 2. æ•°æ�®æ ¡éªŒ\n        if title and link and len(publish_time) == 10:\n            news_item = {\n                \"id\": current_auto_id,  # è‡ªå¢�IDï¼ˆæ ¸å¿ƒä¿®æ”¹ï¼‰\n                \"page\": page_num,       # ä¿�ç•™é¡µç �ï¼ˆå�¯é€‰ï¼Œä¾¿äº�æº¯æº�ï¼‰\n                \"title\": title,\n                \"link\": link,\n                \"publish_time\": publish_time\n            }\n            page_new_data.append(news_item)\n            title_duplicate_set.add(title)\n            current_auto_id += 1  # IDè‡ªå¢�\n            page_count += 1\n    \n    print(f\"âœ… ç¬¬{page_num}é¡µï¼šæ–°å¢� {page_count} æ�¡ä¸�é‡�å¤�æ•°æ�®ï¼ˆå½“å‰�æœ€å¤§ID={current_auto_id-1}ï¼‰\")\n    return page_new_data, len(all_a) > 0\n\ndef crawl_dynamic_pages():\n    \"\"\"æ¨¡æ‹ŸJSç¿»é¡µçˆ¬å�–æ‰€æœ‰æ•°æ�®\"\"\"\n    session = requests.Session()\n    all_new_data = []\n    current_page = 1\n    has_next_page = True\n    \n    # çˆ¬å�–ç¬¬ä¸€é¡µ\n    print(f\"\\nğŸš€ å¼€å§‹çˆ¬å�–ç¬¬ {current_page} é¡µï¼ˆåˆ�å§‹é¡µï¼‰\")\n    response = session.get(BASE_URL, headers=HEADERS, timeout=15, verify=False)\n    response.encoding = \"utf-8\"\n    page_data, has_data = extract_page_data(response.text, current_page)\n    all_new_data.extend(page_data)\n    \n    # å¾ªç�¯çˆ¬å�–ä¸‹ä¸€é¡µ\n    while has_next_page and has_data:\n        current_page += 1\n        print(f\"\\nğŸ“� æ¨¡æ‹Ÿç‚¹å‡»ä¸‹ä¸€é¡µï¼Œçˆ¬å�–ç¬¬ {current_page} é¡µ\")\n        next_page_url = f\"{BASE_URL}?p={current_page}&pageSize=15\"\n        \n        try:\n            time.sleep(2)  # æ¨¡æ‹Ÿäººç±»ç¿»é¡µå»¶è¿Ÿ\n            response = session.get(next_page_url, headers=HEADERS, timeout=15, verify=False)\n            response.raise_for_status()\n            response.encoding = \"utf-8\"\n            \n            page_data, has_data = extract_page_data(response.text, current_page)\n            all_new_data.extend(page_data)\n            \n            # æ— æ–°æ•°æ�®åˆ™å�œæ­¢ç¿»é¡µ\n            if len(page_data) == 0:\n                has_next_page = False\n                print(f\"ğŸ“Œ ç¬¬{current_page}é¡µæ— æ–°æ•°æ�®ï¼Œå·²çˆ¬å�–åˆ°æœ€å��ä¸€é¡µ\")\n                \n            time.sleep(0.5)  # éš�æœºå°�å»¶è¿Ÿ\n            \n        except Exception as e:\n            print(f\"â�Œ ç¬¬{current_page}é¡µçˆ¬å�–å¤±è´¥ï¼š{str(e)[:100]}\")\n            time.sleep(3)\n            try:\n                response = session.get(next_page_url, headers=HEADERS, timeout=15, verify=False)\n                page_data, has_data = extract_page_data(response.text, current_page)\n                all_new_data.extend(page_data)\n            except:\n                has_next_page = False\n                print(f\"ğŸ“Œ ç¬¬{current_page}é¡µé‡�è¯•å¤±è´¥ï¼Œå�œæ­¢ç¿»é¡µ\")\n    \n    return all_new_data\n\ndef save_to_jsonl(new_data):\n    \"\"\"ä¿�å­˜æ•°æ�®ï¼šå�ˆå¹¶å�†å�²+æ–°å¢�ï¼Œä¿�è¯�IDè¿�ç»­ä¸”ä¸�é‡�å¤�\"\"\"\n    # 1. è¯»å�–å�†å�²æ•°æ�®\n    history_data = []\n    if os.path.exists(JSONL_FILE):\n        try:\n            with open(JSONL_FILE, \"r\", encoding=\"utf-8\") as f:\n                for line in f:\n                    line = line.strip()\n                    if line:\n                        history_data.append(json.loads(line))\n        except Exception as e:\n            print(f\"âš ï¸� è¯»å�–å�†å�²æ•°æ�®å¤±è´¥ï¼š{e}ï¼Œå°†è¦†ç›–å�Ÿæœ‰æ–‡ä»¶\")\n            history_data = []\n    \n    # 2. å�ˆå¹¶æ•°æ�®ï¼ˆå�†å�²+æ–°å¢�ï¼‰\n    all_data = history_data + new_data\n    \n    # 3. æœ€ç»ˆå�»é‡�ï¼ˆæŒ‰æ ‡é¢˜ï¼‰+ æŒ‰IDæ�’åº�\n    unique_data = []\n    unique_titles = set()\n    for item in all_data:\n        if item[\"title\"] not in unique_titles:\n            unique_titles.add(item[\"title\"])\n            unique_data.append(item)\n    # æŒ‰IDå�‡åº�æ�’åˆ—ï¼Œä¿�è¯�é¡ºåº�ä¸€è‡´\n    unique_data.sort(key=lambda x: x[\"id\"])\n    \n    # 4. å†™å…¥æ–‡ä»¶\n    try:\n        with open(JSONL_FILE, \"w\", encoding=\"utf-8\") as f:\n            for item in unique_data:\n                json_line = json.dumps(item, ensure_ascii=False)\n                f.write(json_line + \"\\n\")\n        \n        print(f\"\\nğŸ“„ JSONLæ–‡ä»¶ä¿�å­˜æˆ�åŠŸï¼�\")\n        print(f\"ğŸ“� æ–‡ä»¶è·¯å¾„ï¼š{os.path.abspath(JSONL_FILE)}\")\n        print(f\"ğŸ“ˆ æ€»è®¡æ•°æ�®ï¼š{len(unique_data)} æ�¡ï¼ˆIDèŒƒå›´ï¼š1~{unique_data[-1]['id']}ï¼‰\")\n        print(f\"ğŸ”� æœ¬æ¬¡æ–°å¢�ï¼š{len(new_data)} æ�¡\")\n    except PermissionError:\n        print(f\"\\nâ�Œ æ�ƒé™�ä¸�è¶³ï¼�è¯·å…³é—­æ‰“å¼€çš„ {JSONL_FILE} æ–‡ä»¶å��é‡�è¯•\")\n    except Exception as e:\n        print(f\"\\nâ�Œ ä¿�å­˜å¤±è´¥ï¼š{str(e)}\")\n\nif __name__ == \"__main__\":\n    print(\"ğŸš€ å¼€å§‹çˆ¬å�–äº‹ä¸šå�•ä½�æ‹›è�˜ä¿¡æ�¯ï¼ˆè‡ªå¢�ID+å…¨å±€æŸ¥é‡�+åŠ¨æ€�ç¿»é¡µï¼‰\")\n    # æ­¥éª¤1ï¼šåŠ è½½å�†å�²æ•°æ�®ï¼Œåˆ�å§‹åŒ–è‡ªå¢�ID\n    load_existing_data()\n    # æ­¥éª¤2ï¼šåŠ¨æ€�ç¿»é¡µçˆ¬å�–æ–°æ•°æ�®\n    new_data = crawl_dynamic_pages()\n    # æ­¥éª¤3ï¼šä¿�å­˜æ•°æ�®ï¼ˆå�ˆå¹¶å�†å�²+æ–°å¢�ï¼‰\n    save_to_jsonl(new_data)\n    print(\"\\nğŸ�‰ çˆ¬å�–ä»»åŠ¡å…¨éƒ¨å®Œæˆ�ï¼�\")",
+        "preview": "import requests\nfrom lxml import etree\nimport time\nimport json\nimport os\nfrom urllib.parse import urljoin\n\n# é…�ç½®é¡¹\nLINK_FEATURE = \"/SYrlzyhshbzb/fwyd/SYkaoshizhaopin/\"\nBASE_URL = \"http://job.mohrss.gov.cn/cjobs/institution/listInstitution\"\nHEADERS = {\n    \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\",\n    \"Referer\": \"http://job.mohrss.gov.cn/\",\n    \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0....",
+        "start_line": 1,
+        "end_line": 195
+      },
+      "metadata": {
+        "hash": "a58139d0",
+        "encoding": "Windows-1254",
+        "line_count": 195,
+        "truncated": false
+      },
+      "analysis": {
+        "language": "python"
+      }
+    },
+    {
+      "file_info": {
+        "path": "crawler.py",
+        "name": "crawler.py",
+        "extension": ".py",
+        "size_bytes": 9214,
+        "size_human": "9.00 KB",
+        "modified": "2026-03-17T20:36:35.022594",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "import json\nimport time\nimport re\nfrom selenium import webdriver\nfrom selenium.webdriver.common.by import By\nfrom selenium.webdriver.support.ui import WebDriverWait\nfrom selenium.webdriver.support import expected_conditions as EC\nfrom selenium.webdriver.edge.options import Options\nfrom selenium.webdriver.edge.service import Service\nfrom selenium.common.exceptions import TimeoutException, NoSuchElementException\n\n# ========== é…�ç½®åŒº ==========\nEDGE_DRIVER_PATH = r\"D:\\Mine\\Download\\edge download\\edgedriver_win64\\msedgedriver.exe\" # è¯·ç¡®è®¤ä½ çš„è·¯å¾„\nTARGET_URL = \"https://xiaoyuan.zhaopin.com/search/index?refcode=4404&cateType=major\"\nOUTPUT_FILE = \"jobs_page_1.jsonl\"\n# ===========================\n\ndef init_driver():\n    \"\"\"åˆ�å§‹åŒ–Edgeæµ�è§ˆå™¨ï¼ˆæ— å¤´æ¨¡å¼�ï¼Œéš�è—�çª—å�£ï¼‰\"\"\"\n    edge_options = Options()\n    edge_options.add_argument(\"--headless=new\")\n    edge_options.add_argument(\"--disable-blink-features=AutomationControlled\")\n    edge_options.add_experimental_option(\"excludeSwitches\", [\"enable-automation\"])\n    edge_options.add_experimental_option(\"useAutomationExtension\", False)\n    edge_options.add_argument(\"--window-size=1920,1080\")\n    edge_options.add_argument(\"--disable-gpu\")\n    edge_options.add_argument(\"--no-sandbox\")\n    edge_options.add_argument(\"--log-level=3\")\n    \n    service = Service(EDGE_DRIVER_PATH)\n    driver = webdriver.Edge(service=service, options=edge_options)\n    # ç§»é™¤webdriverç‰¹å¾�\n    driver.execute_script(\"Object.defineProperty(navigator, 'webdriver', {get: () => undefined})\")\n    driver.implicitly_wait(10)\n    return driver\n\ndef parse_list_item(item_element):\n    \"\"\"ä»�åˆ—è¡¨é¡µçš„å�•ä¸ªè�Œä½�å�¡ç‰‡ä¸­æ��å�–æ•°æ�®\"\"\"\n    try:\n        # 1. å²—ä½�å��ç§°\n        job_name = item_element.find_element(By.CSS_SELECTOR, \".position-card__job-name\").text.strip()\n        \n        # 2. åœ°å�€ï¼ˆéœ€è¦�ä»�ç±»ä¼¼ã€Œéƒ‘å·�Â·ä¸­å�Ÿã€�çš„æ–‡æœ¬ä¸­æ��å�–ï¼‰\n        city_text = item_element.find_element(By.CSS_SELECTOR, \".position-card__city-name\").text.strip()\n        # ä½¿ç”¨æ­£åˆ™æ��å�–åŸ�å¸‚å��ï¼Œå�»æ�‰ã€ŒÂ·ã€�å��é�¢çš„åŒºåŸŸ\n        city_match = re.search(r'[ã€Œ]?(.*?)[Â·ã€�]', city_text)\n        address = city_match.group(1) if city_match else city_text.replace('ã€Œ', '').replace('ã€�', '')\n        \n        # 3. è–ªèµ„èŒƒå›´\n        salary = item_element.find_element(By.CSS_SELECTOR, \".position-card__salary\").text.strip()\n        \n        # 4. å…¬å�¸å��ç§°\n        company = item_element.find_element(By.CSS_SELECTOR, \".position-card__company__name\").text.strip()\n        \n        # 5. æ‰€å±�è¡Œä¸šã€�å…¬å�¸è§„æ¨¡ã€�å…¬å�¸ç±»å�‹ï¼ˆåœ¨tabsé‡Œï¼‰\n        tabs = item_element.find_elements(By.CSS_SELECTOR, \".position-card__company__tabs-item\")\n        industry = tabs[0].text.strip() if len(tabs) > 0 else \"\"\n        company_size = tabs[1].text.strip() if len(tabs) > 1 else \"\"\n        company_type = tabs[2].text.strip() if len(tabs) > 2 else \"\"\n        \n        # 6. å²—ä½�ç¼–ç �ï¼ˆä»�dataå±�æ€§æˆ–é“¾æ�¥ä¸­æ��å�–ï¼‰\n        # ä¼˜å…ˆä»�å¤–å±‚divçš„dataå±�æ€§è�·å�–\n        job_code = item_element.get_attribute(\"data-sensors-exposure-option\")\n        if job_code:\n            try:\n                import json as json_lib\n                opt = json_lib.loads(job_code.replace('&quot;', '\"'))\n                job_code = opt.get(\"properties\", {}).get(\"jdno\", \"\")\n            except:\n                job_code = \"\"\n        \n        # 7. å²—ä½�æ�¥æº�åœ°å�€ï¼ˆè¯¦æƒ…é¡µé“¾æ�¥ï¼‰\n        # æ™ºè�”çš„è¯¦æƒ…é¡µé“¾æ�¥å�¯ä»¥é€šè¿‡å²—ä½�ç¼–ç �æ‹¼æ�¥ï¼Œæˆ–è€…ä»�å�¡ç‰‡ä¸Šçš„æŸ�ä¸ªå±�æ€§è�·å�–\n        # è¿™é‡Œä½¿ç”¨æ‹¼æ�¥æ–¹å¼�ï¼Œå› ä¸ºé“¾æ�¥ç»“æ�„å›ºå®š\n        if job_code:\n            detail_url = f\"https://xiaoyuan.zhaopin.com/job/{job_code}?refcode=4430&srccode=443001&jobSourceType=2\"\n        else:\n            # å¦‚æ�œæ²¡æ‹¿åˆ°ç¼–ç �ï¼Œæš‚æ—¶ç•™ç©º\n            detail_url = \"\"\n        \n        return {\n            \"å²—ä½�å��ç§°\": job_name,\n            \"åœ°å�€\": address,\n            \"è–ªèµ„èŒƒå›´\": salary,\n            \"å…¬å�¸å��ç§°\": company,\n            \"æ‰€å±�è¡Œä¸š\": industry,\n            \"å…¬å�¸è§„æ¨¡\": company_size,\n            \"å…¬å�¸ç±»å�‹\": company_type,\n            \"å²—ä½�ç¼–ç �\": job_code,\n            \"å²—ä½�è¯¦æƒ…\": \"\",  # å¾…è¯¦æƒ…é¡µè¡¥å……\n            \"æ›´æ–°æ—¥æœŸ\": \"\",  # å¾…è¯¦æƒ…é¡µè¡¥å……ï¼ˆå¦‚æ�œåˆ—è¡¨é¡µæ²¡æœ‰ï¼‰\n            \"å…¬å�¸è¯¦æƒ…\": \"\",  # å¾…è¯¦æƒ…é¡µè¡¥å……\n            \"å²—ä½�æ�¥æº�åœ°å�€\": detail_url\n        }\n    except Exception as e:\n        print(f\"è§£æ��åˆ—è¡¨é¡¹æ—¶å‡ºé”™: {e}\")\n        return None\n\ndef parse_detail_page(driver, detail_url):\n    \"\"\"è®¿é—®è¯¦æƒ…é¡µï¼Œè¡¥å……å²—ä½�è¯¦æƒ…å’Œå…¬å�¸è¯¦æƒ…\"\"\"\n    if not detail_url:\n        return \"\", \"\", \"\"\n    \n    try:\n        driver.get(detail_url)\n        # ç­‰å¾…è¯¦æƒ…é¡µçš„æ ¸å¿ƒå†…å®¹åŠ è½½\n        WebDriverWait(driver, 10).until(\n            EC.presence_of_element_located((By.CSS_SELECTOR, \".job-info__desc\"))\n        )\n        time.sleep(1)  # é¢�å¤–ç­‰å¾…åŠ¨æ€�å†…å®¹\n        \n        # 1. å²—ä½�è¯¦æƒ…\n        job_desc = \"\"\n        try:\n            desc_elem = driver.find_element(By.CSS_SELECTOR, \".job-info__desc\")\n            job_desc = desc_elem.get_attribute(\"innerHTML\").replace(\"<br>\", \"\\n\").strip()\n        except:\n            pass\n        \n        # 2. æ›´æ–°æ—¥æœŸï¼ˆå�¯èƒ½éœ€è¦�ä»�å…¶ä»–ä½�ç½®æ��å�–ï¼Œæ¯”å¦‚å�‘å¸ƒæ—¶é—´ï¼‰\n        update_date = \"\"\n        try:\n            # å°�è¯•æŸ¥æ‰¾å�‘å¸ƒæ—¶é—´ï¼Œè¿™é‡Œéœ€è¦�æ ¹æ�®å®�é™…é¡µé�¢ç»“æ�„è°ƒæ•´é€‰æ‹©å™¨\n            # å�‡è®¾åœ¨ä¸€ä¸ªclassä¸º\"job-info__time\"çš„å…ƒç´ é‡Œ\n            time_elem = driver.find_element(By.CSS_SELECTOR, \".job-info__time\")\n            update_date = time_elem.text.strip()\n        except:\n            pass\n        \n        # 3. å…¬å�¸è¯¦æƒ…ï¼ˆå�¯èƒ½éœ€è¦�ç‚¹å‡»\"å…¬å�¸è¯¦æƒ…\"é€‰é¡¹å�¡æˆ–æŸ¥æ‰¾ç‰¹å®šåŒºåŸŸï¼‰\n        company_desc = \"\"\n        try:\n            # å°�è¯•æŸ¥æ‰¾å…¬å�¸ä»‹ç»�åŒºåŸŸ\n            company_elem = driver.find_element(By.CSS_SELECTOR, \".company-info__desc\")\n            company_desc = company_elem.get_attribute(\"innerHTML\").replace(\"<br>\", \"\\n\").strip()\n        except:\n            pass\n        \n        return job_desc, update_date, company_desc\n    except Exception as e:\n        print(f\"è§£æ��è¯¦æƒ…é¡µ {detail_url} æ—¶å‡ºé”™: {e}\")\n        return \"\", \"\", \"\"\n\ndef crawl_first_page():\n    \"\"\"çˆ¬å�–ç¬¬ä¸€é¡µçš„æ‰€æœ‰è�Œä½�æ•°æ�®\"\"\"\n    driver = init_driver()\n    all_jobs = []\n    \n    try:\n        print(f\"æ­£åœ¨è®¿é—®: {TARGET_URL}\")\n        driver.get(TARGET_URL)\n        \n        # ç­‰å¾…è�Œä½�å�¡ç‰‡åŠ è½½\n        WebDriverWait(driver, 20).until(\n            EC.presence_of_element_located((By.CSS_SELECTOR, \".position-card\"))\n        )\n        # é¢�å¤–ç­‰å¾…ï¼Œç¡®ä¿�æ‰€æœ‰åŠ¨æ€�å†…å®¹åŠ è½½å®Œæ¯•\n        time.sleep(3)\n        \n        # è�·å�–æ‰€æœ‰è�Œä½�å�¡ç‰‡\n        job_cards = driver.find_elements(By.CSS_SELECTOR, \".position-card\")\n        print(f\"æ‰¾åˆ° {len(job_cards)} ä¸ªè�Œä½�å�¡ç‰‡\")\n        \n        # å…ˆè§£æ��åˆ—è¡¨é¡µæ•°æ�®\n        for i, card in enumerate(job_cards):\n            print(f\"æ­£åœ¨è§£æ��ç¬¬ {i+1} ä¸ªè�Œä½�...\")\n            job_data = parse_list_item(card)\n            if job_data:\n                all_jobs.append(job_data)\n        \n        # å†�é€�ä¸ªè®¿é—®è¯¦æƒ…é¡µè¡¥å……æ•°æ�®ï¼ˆå�¯é€‰ï¼Œå¦‚æ�œéœ€è¦�å®Œæ•´å­—æ®µï¼‰\n        # å¦‚æ�œç¬¬ä¸€é¡µæ•°æ�®é‡�ä¸�å¤§ï¼Œå�¯ä»¥å¼€å�¯ï¼›å¦‚æ�œå�ªæƒ³å¿«é€Ÿè�·å�–ç¬¬ä¸€é¡µï¼Œå�¯ä»¥æš‚æ—¶æ³¨é‡Šæ�‰\n        print(\"\\nå¼€å§‹è®¿é—®è¯¦æƒ…é¡µè¡¥å……æ•°æ�®...\")\n        for i, job in enumerate(all_jobs):\n            if job[\"å²—ä½�æ�¥æº�åœ°å�€\"]:\n                print(f\"  æ­£åœ¨è�·å�–ç¬¬ {i+1} ä¸ªè�Œä½�çš„è¯¦æƒ…...\")\n                desc, update, company = parse_detail_page(driver, job[\"å²—ä½�æ�¥æº�åœ°å�€\"])\n                job[\"å²—ä½�è¯¦æƒ…\"] = desc\n                job[\"æ›´æ–°æ—¥æœŸ\"] = update\n                job[\"å…¬å�¸è¯¦æƒ…\"] = company\n                # éš�æœºæš‚å�œï¼Œé�¿å…�è¯·æ±‚è¿‡å¿«\n                time.sleep(1)\n        \n        print(f\"\\nâœ… ç¬¬ä¸€é¡µæ•°æ�®çˆ¬å�–å®Œæˆ�ï¼Œå…± {len(all_jobs)} æ�¡\")\n        return all_jobs\n        \n    except TimeoutException:\n        print(\"â�Œ é¡µé�¢åŠ è½½è¶…æ—¶ï¼Œè¯·æ£€æŸ¥ç½‘ç»œæˆ–ç½‘ç«™æ˜¯å�¦æ­£å¸¸\")\n        return []\n    except Exception as e:\n        print(f\"â�Œ å�‘ç”ŸæœªçŸ¥é”™è¯¯: {e}\")\n        return []\n    finally:\n        driver.quit()\n\ndef save_to_jsonl(data, filename):\n    \"\"\"ä¿�å­˜ä¸ºJSONLæ ¼å¼�\"\"\"\n    with open(filename, \"w\", encoding=\"utf-8\") as f:\n        for item in data:\n            f.write(json.dumps(item, ensure_ascii=False) + \"\\n\")\n    print(f\"ğŸ“� æ•°æ�®å·²ä¿�å­˜åˆ°: {filename}\")\n\nif __name__ == \"__main__\":\n    print(\"=\"*50)\n    print(\"æ™ºè�”æ‹›è�˜æ ¡å›­æ‹›è�˜çˆ¬è™«ï¼ˆç¬¬ä¸€é¡µï¼‰\")\n    print(\"=\"*50)\n    \n    # çˆ¬å�–ç¬¬ä¸€é¡µ\n    jobs_data = crawl_first_page()\n    \n    # ä¿�å­˜ç»“æ�œ\n    if jobs_data:\n        save_to_jsonl(jobs_data, OUTPUT_FILE)\n        # æ‰“å�°ç¬¬ä¸€æ�¡ä½œä¸ºç¤ºä¾‹\n        print(\"\\nç¤ºä¾‹æ•°æ�®ï¼ˆç¬¬ä¸€æ�¡ï¼‰ï¼š\")\n        print(json.dumps(jobs_data[0], ensure_ascii=False, indent=2))\n    else:\n        print(\"æ²¡æœ‰è�·å�–åˆ°ä»»ä½•æ•°æ�®\")",
+        "preview": "import json\nimport time\nimport re\nfrom selenium import webdriver\nfrom selenium.webdriver.common.by import By\nfrom selenium.webdriver.support.ui import WebDriverWait\nfrom selenium.webdriver.support import expected_conditions as EC\nfrom selenium.webdriver.edge.options import Options\nfrom selenium.webdriver.edge.service import Service\nfrom selenium.common.exceptions import TimeoutException, NoSuchElementException\n\n# ========== é…�ç½®åŒº ==========\nEDGE_DRIVER_PATH = r\"D:\\Mine\\Download\\edge download...",
+        "start_line": 1,
+        "end_line": 218
+      },
+      "metadata": {
+        "hash": "b4505e82",
+        "encoding": "Windows-1254",
+        "line_count": 218,
+        "truncated": false
+      },
+      "analysis": {
+        "language": "python"
+      }
+    },
+    {
+      "file_info": {
+        "path": "crawler_test.py",
+        "name": "crawler_test.py",
+        "extension": ".py",
+        "size_bytes": 13215,
+        "size_human": "12.91 KB",
+        "modified": "2026-03-17T21:01:23.097957",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "import json\nimport time\nimport re\nfrom selenium import webdriver\nfrom selenium.webdriver.common.by import By\nfrom selenium.webdriver.support.ui import WebDriverWait\nfrom selenium.webdriver.support import expected_conditions as EC\nfrom selenium.webdriver.edge.options import Options\nfrom selenium.webdriver.edge.service import Service\nfrom selenium.common.exceptions import TimeoutException, NoSuchElementException\n\n# ========== é…�ç½®åŒº ==========\nEDGE_DRIVER_PATH = r\"D:\\Mine\\Download\\edge download\\edgedriver_win64\\msedgedriver.exe\"\nTARGET_URL = \"https://xiaoyuan.zhaopin.com/search/index?refcode=4404&cateType=major\"\nOUTPUT_FILE = \"jobs_page_1.jsonl\"\nCOOKIE_FILE = \"zhaopin_cookies.json\"\n\n# è´¦å�·é…�ç½®\nUSERNAME = \"19012713550\"\nPASSWORD = \"zzh20050119\"\n# ===========================\n\ndef init_driver(headless=False):\n    \"\"\"åˆ�å§‹åŒ–Edgeæµ�è§ˆå™¨\"\"\"\n    edge_options = Options()\n    if headless:\n        edge_options.add_argument(\"--headless=new\")\n    edge_options.add_argument(\"--disable-blink-features=AutomationControlled\")\n    edge_options.add_experimental_option(\"excludeSwitches\", [\"enable-automation\"])\n    edge_options.add_experimental_option(\"useAutomationExtension\", False)\n    edge_options.add_argument(\"--window-size=1920,1080\")\n    edge_options.add_argument(\"--disable-gpu\")\n    edge_options.add_argument(\"--no-sandbox\")\n    edge_options.add_argument(\"--log-level=3\")\n    edge_options.add_argument(\"--disable-images\")  # ç¦�ç”¨å›¾ç‰‡åŠ å¿«åŠ è½½\n    edge_options.add_argument(\"--disable-javascript\")  # æ ¹æ�®éœ€è¦�å†³å®šæ˜¯å�¦ç¦�ç”¨JS\n    \n    service = Service(EDGE_DRIVER_PATH)\n    driver = webdriver.Edge(service=service, options=edge_options)\n    driver.execute_script(\"Object.defineProperty(navigator, 'webdriver', {get: () => undefined})\")\n    driver.implicitly_wait(10)\n    return driver\n\ndef auto_login(driver):\n    \"\"\"è‡ªåŠ¨ä½¿ç”¨è´¦å�·å¯†ç �ç™»å½•\"\"\"\n    print(\"ğŸ”‘ å¼€å§‹è‡ªåŠ¨ç™»å½•...\")\n    \n    # è®¿é—®ç™»å½•é¡µï¼ˆç›®æ ‡URLä¼šè‡ªåŠ¨è·³è½¬åˆ°ç™»å½•é¡µï¼‰\n    driver.get(TARGET_URL)\n    time.sleep(2)\n    \n    # æ£€æŸ¥æ˜¯å�¦å·²ç»�åœ¨ç›®æ ‡é¡µï¼ˆå·²ç™»å½•çŠ¶æ€�ï¼‰\n    if \"xiaoyuan.zhaopin.com\" in driver.current_url and \"search\" in driver.current_url:\n        print(\"âœ… å·²ç»�å¤„äº�ç™»å½•çŠ¶æ€�\")\n        return True\n    \n    try:\n        # 1. ç­‰å¾…ç™»å½•é¡µåŠ è½½\n        WebDriverWait(driver, 10).until(\n            EC.presence_of_element_located((By.CLASS_NAME, \"zppp-panel-tab\"))\n        )\n        \n        # 2. åˆ‡æ�¢åˆ°\"è´¦å¯†ç™»å½•\"æ ‡ç­¾\n        print(\"  åˆ‡æ�¢åˆ°è´¦å¯†ç™»å½•...\")\n        password_tab = driver.find_element(By.XPATH, \"//li[@class='zppp-panel-tab' and contains(text(), 'è´¦å¯†ç™»å½•')]\")\n        password_tab.click()\n        time.sleep(1)\n        \n        # 3. å¡«å†™ç”¨æˆ·å��\n        print(\"  å¡«å†™ç”¨æˆ·å��...\")\n        username_input = driver.find_element(By.CSS_SELECTOR, \"input.zppp-input[placeholder='ç”¨æˆ·å��/æ‰‹æœºå�·/é‚®ç®±']\")\n        username_input.clear()\n        username_input.send_keys(USERNAME)\n        time.sleep(0.5)\n        \n        # 4. å¡«å†™å¯†ç �\n        print(\"  å¡«å†™å¯†ç �...\")\n        password_input = driver.find_element(By.CSS_SELECTOR, \"input.zppp-input[type='password']\")\n        password_input.clear()\n        password_input.send_keys(PASSWORD)\n        time.sleep(0.5)\n        \n        # 5. å‹¾é€‰å��è®®ï¼ˆé»˜è®¤æœªå‹¾é€‰ï¼‰\n        print(\"  å‹¾é€‰ç”¨æˆ·å��è®®...\")\n        checkbox = driver.find_element(By.CSS_SELECTOR, \"input.zppp-accept__checkbox#accept\")\n        if not checkbox.is_selected():\n            # ç‚¹å‡»å¤�é€‰æ¡†\n            driver.execute_script(\"arguments[0].click();\", checkbox)\n        time.sleep(0.5)\n        \n        # 6. ç‚¹å‡»ç™»å½•æŒ‰é’®\n        print(\"  ç‚¹å‡»ç™»å½•æŒ‰é’®...\")\n        login_button = driver.find_element(By.CSS_SELECTOR, \"button.zppp-submit\")\n        login_button.click()\n        \n        # 7. ç­‰å¾…ç™»å½•æˆ�åŠŸï¼ˆè·³è½¬åˆ°ç›®æ ‡é¡µï¼‰\n        print(\"  ç­‰å¾…ç™»å½•æˆ�åŠŸ...\")\n        WebDriverWait(driver, 30).until(\n            lambda d: \"xiaoyuan.zhaopin.com\" in d.current_url and \"search\" in d.current_url\n        )\n        print(\"âœ… ç™»å½•æˆ�åŠŸï¼�\")\n        \n        # å�¯é€‰ï¼šä¿�å­˜cookiesä¾›å��ç»­ä½¿ç”¨\n        save_cookies(driver, COOKIE_FILE)\n        return True\n        \n    except TimeoutException:\n        print(\"â�Œ ç™»å½•è¶…æ—¶ï¼Œè¯·æ£€æŸ¥ç½‘ç»œæˆ–è´¦å�·\")\n        return False\n    except Exception as e:\n        print(f\"â�Œ ç™»å½•è¿‡ç¨‹å‡ºé”™: {e}\")\n        return False\n\ndef save_cookies(driver, filename):\n    \"\"\"ä¿�å­˜cookiesåˆ°æ–‡ä»¶\"\"\"\n    cookies = driver.get_cookies()\n    with open(filename, 'w', encoding='utf-8') as f:\n        json.dump(cookies, f, ensure_ascii=False, indent=2)\n    print(f\"âœ… Cookieså·²ä¿�å­˜åˆ° {filename}\")\n\ndef parse_list_item(item_element):\n    \"\"\"ä»�åˆ—è¡¨é¡µçš„å�•ä¸ªè�Œä½�å�¡ç‰‡ä¸­æ��å�–æ•°æ�®\"\"\"\n    try:\n        # 1. å²—ä½�å��ç§°\n        job_name = item_element.find_element(By.CSS_SELECTOR, \".position-card__job-name\").text.strip()\n        \n        # 2. åœ°å�€\n        city_text = item_element.find_element(By.CSS_SELECTOR, \".position-card__city-name\").text.strip()\n        city_match = re.search(r'[ã€Œ]?(.*?)[Â·ã€�]', city_text)\n        address = city_match.group(1) if city_match else city_text.replace('ã€Œ', '').replace('ã€�', '')\n        \n        # 3. è–ªèµ„èŒƒå›´\n        salary = item_element.find_element(By.CSS_SELECTOR, \".position-card__salary\").text.strip()\n        \n        # 4. å…¬å�¸å��ç§°\n        company = item_element.find_element(By.CSS_SELECTOR, \".position-card__company__name\").text.strip()\n        \n        # 5-7. æ‰€å±�è¡Œä¸šã€�å…¬å�¸è§„æ¨¡ã€�å…¬å�¸ç±»å�‹\n        tabs = item_element.find_elements(By.CSS_SELECTOR, \".position-card__company__tabs-item\")\n        industry = tabs[0].text.strip() if len(tabs) > 0 else \"\"\n        company_size = tabs[1].text.strip() if len(tabs) > 1 else \"\"\n        company_type = tabs[2].text.strip() if len(tabs) > 2 else \"\"\n        \n        # 8. å²—ä½�ç¼–ç �\n        job_code = \"\"\n        data_option = item_element.get_attribute(\"data-sensors-exposure-option\")\n        if data_option:\n            try:\n                data_option = data_option.replace('&quot;', '\"')\n                opt = json.loads(data_option)\n                job_code = opt.get(\"properties\", {}).get(\"jdno\", \"\")\n            except:\n                pass\n        \n        # 12. å²—ä½�æ�¥æº�åœ°å�€\n        detail_url = f\"https://xiaoyuan.zhaopin.com/job/{job_code}?refcode=4430&srccode=443001&jobSourceType=2\" if job_code else \"\"\n        \n        return {\n            \"å²—ä½�å��ç§°\": job_name,\n            \"åœ°å�€\": address,\n            \"è–ªèµ„èŒƒå›´\": salary,\n            \"å…¬å�¸å��ç§°\": company,\n            \"æ‰€å±�è¡Œä¸š\": industry,\n            \"å…¬å�¸è§„æ¨¡\": company_size,\n            \"å…¬å�¸ç±»å�‹\": company_type,\n            \"å²—ä½�ç¼–ç �\": job_code,\n            \"å²—ä½�è¯¦æƒ…\": \"\",  # å¾…è¯¦æƒ…é¡µè¡¥å……\n            \"æ›´æ–°æ—¥æœŸ\": \"\",  # å¾…è¯¦æƒ…é¡µè¡¥å……\n            \"å…¬å�¸è¯¦æƒ…\": \"\",  # å¾…è¯¦æƒ…é¡µè¡¥å……\n            \"å²—ä½�æ�¥æº�åœ°å�€\": detail_url\n        }\n    except Exception as e:\n        print(f\"è§£æ��åˆ—è¡¨é¡¹æ—¶å‡ºé”™: {e}\")\n        return None\n\ndef parse_detail_page(driver, detail_url):\n    \"\"\"è®¿é—®è¯¦æƒ…é¡µï¼Œè¡¥å……å²—ä½�è¯¦æƒ…ã€�æ›´æ–°æ—¥æœŸã€�å…¬å�¸è¯¦æƒ…\"\"\"\n    if not detail_url:\n        return \"\", \"\", \"\"\n    \n    try:\n        driver.get(detail_url)\n        \n        # ç­‰å¾…å²—ä½�è¯¦æƒ…åŒºåŸŸåŠ è½½\n        WebDriverWait(driver, 10).until(\n            EC.presence_of_element_located((By.CSS_SELECTOR, \".job-info__desc\"))\n        )\n        time.sleep(1)\n        \n        # 9. å²—ä½�è¯¦æƒ…\n        job_desc = \"\"\n        try:\n            desc_elem = driver.find_element(By.CSS_SELECTOR, \".job-info__desc\")\n            job_desc = desc_elem.get_attribute(\"innerHTML\").replace(\"<br>\", \"\\n\").strip()\n        except:\n            pass\n        \n        # 10. æ›´æ–°æ—¥æœŸï¼ˆå°�è¯•å¤šä¸ªå�¯èƒ½çš„é€‰æ‹©å™¨ï¼‰\n        update_date = \"\"\n        possible_selectors = [\n            \".job-info__time\",\n            \".job-header__info-item\", \n            \".publish-time\",\n            \".job-operate\"\n        ]\n        for selector in possible_selectors:\n            try:\n                elem = driver.find_element(By.CSS_SELECTOR, selector)\n                text = elem.text\n                # æ��å�–åŒ…å�«æ—¥æœŸçš„æ–‡æœ¬\n                date_match = re.search(r'\\d{1,2}æœˆ\\d{1,2}æ—¥|\\d{4}-\\d{2}-\\d{2}', text)\n                if date_match:\n                    update_date = date_match.group()\n                    break\n            except:\n                continue\n        \n        # 11. å…¬å�¸è¯¦æƒ…\n        company_desc = \"\"\n        try:\n            # å�¯èƒ½éœ€è¦�ç‚¹å‡»\"å…¬å�¸è¯¦æƒ…\"æ ‡ç­¾\n            try:\n                company_tab = driver.find_element(By.XPATH, \"//div[contains(text(), 'å…¬å�¸è¯¦æƒ…')]\")\n                company_tab.click()\n                time.sleep(0.5)\n            except:\n                pass\n            \n            # æŸ¥æ‰¾å…¬å�¸ä»‹ç»�åŒºåŸŸ\n            company_elem = driver.find_element(By.CSS_SELECTOR, \".company-info__desc\")\n            company_desc = company_elem.get_attribute(\"innerHTML\").replace(\"<br>\", \"\\n\").strip()\n        except:\n            pass\n        \n        return job_desc, update_date, company_desc\n    except Exception as e:\n        print(f\"è§£æ��è¯¦æƒ…é¡µ {detail_url} æ—¶å‡ºé”™: {e}\")\n        return \"\", \"\", \"\"\n\ndef crawl_first_page():\n    \"\"\"çˆ¬å�–ç¬¬ä¸€é¡µçš„æ‰€æœ‰è�Œä½�æ•°æ�®ï¼ˆè‡ªåŠ¨ç™»å½•+åˆ—è¡¨é¡µ+è¯¦æƒ…é¡µï¼‰\"\"\"\n    driver = init_driver(headless=False)  # å…ˆæœ‰çª—å�£æ¨¡å¼�è°ƒè¯•\n    all_jobs = []\n    \n    try:\n        # 1. è‡ªåŠ¨ç™»å½•\n        if not auto_login(driver):\n            print(\"â�Œ ç™»å½•å¤±è´¥ï¼Œç¨‹åº�é€€å‡º\")\n            return []\n        \n        # 2. ç­‰å¾…è�Œä½�å�¡ç‰‡åŠ è½½\n        print(\"\\nç­‰å¾…è�Œä½�åˆ—è¡¨åŠ è½½...\")\n        WebDriverWait(driver, 20).until(\n            EC.presence_of_element_located((By.CSS_SELECTOR, \".position-card\"))\n        )\n        time.sleep(2)\n        \n        # 3. è�·å�–æ‰€æœ‰è�Œä½�å�¡ç‰‡\n        job_cards = driver.find_elements(By.CSS_SELECTOR, \".position-card\")\n        print(f\"æ‰¾åˆ° {len(job_cards)} ä¸ªè�Œä½�å�¡ç‰‡\")\n        \n        # 4. è§£æ��åˆ—è¡¨é¡µæ•°æ�®\n        for i, card in enumerate(job_cards):\n            print(f\"\\næ­£åœ¨è§£æ��ç¬¬ {i+1} ä¸ªè�Œä½�ï¼ˆåˆ—è¡¨é¡µï¼‰...\")\n            job_data = parse_list_item(card)\n            if job_data:\n                all_jobs.append(job_data)\n        \n        # 5. è®¿é—®è¯¦æƒ…é¡µè¡¥å……å®Œæ•´æ•°æ�®\n        print(\"\\n\" + \"=\"*50)\n        print(\"å¼€å§‹è®¿é—®è¯¦æƒ…é¡µè¡¥å……æ•°æ�®...\")\n        print(\"=\"*50)\n        \n        for i, job in enumerate(all_jobs):\n            if job[\"å²—ä½�æ�¥æº�åœ°å�€\"]:\n                print(f\"\\nğŸ“„ æ­£åœ¨è�·å�–ç¬¬ {i+1} ä¸ªè�Œä½�çš„è¯¦æƒ…é¡µ ({job['å²—ä½�å��ç§°']})...\")\n                desc, update, company = parse_detail_page(driver, job[\"å²—ä½�æ�¥æº�åœ°å�€\"])\n                job[\"å²—ä½�è¯¦æƒ…\"] = desc\n                job[\"æ›´æ–°æ—¥æœŸ\"] = update\n                job[\"å…¬å�¸è¯¦æƒ…\"] = company\n                \n                # æ‰“å�°è¿›åº¦\n                print(f\"  âœ… å²—ä½�è¯¦æƒ…: {len(desc)} å­—ç¬¦\")\n                print(f\"  âœ… æ›´æ–°æ—¥æœŸ: {update}\")\n                print(f\"  âœ… å…¬å�¸è¯¦æƒ…: {len(company)} å­—ç¬¦\")\n                \n                # ç¤¼è²Œæ€§æš‚å�œï¼Œé�¿å…�è¯·æ±‚è¿‡å¿«\n                time.sleep(1.5)\n            else:\n                print(f\"\\nâš ï¸� ç¬¬ {i+1} ä¸ªè�Œä½�ç¼ºå°‘è¯¦æƒ…é“¾æ�¥ï¼Œè·³è¿‡\")\n        \n        print(f\"\\nâœ… ç¬¬ä¸€é¡µæ•°æ�®çˆ¬å�–å®Œæˆ�ï¼Œå…± {len(all_jobs)} æ�¡å®Œæ•´è�Œä½�ä¿¡æ�¯\")\n        return all_jobs\n        \n    except TimeoutException:\n        print(\"â�Œ é¡µé�¢åŠ è½½è¶…æ—¶ï¼Œè¯·æ£€æŸ¥ç½‘ç»œ\")\n        return []\n    except Exception as e:\n        print(f\"â�Œ å�‘ç”ŸæœªçŸ¥é”™è¯¯: {e}\")\n        return []\n    finally:\n        # ç­‰å¾…ä¸€ä¸‹å†�å…³é—­ï¼Œæ–¹ä¾¿è§‚å¯Ÿç»“æ�œ\n        print(\"\\nğŸ”� æµ�è§ˆå™¨å°†åœ¨15ç§’å��è‡ªåŠ¨å…³é—­ï¼Œè¯·æŸ¥çœ‹æ•°æ�®...\")\n        time.sleep(15)\n        driver.quit()\n\ndef save_to_jsonl(data, filename):\n    \"\"\"ä¿�å­˜ä¸ºJSONLæ ¼å¼�\"\"\"\n    with open(filename, \"w\", encoding=\"utf-8\") as f:\n        for item in data:\n            f.write(json.dumps(item, ensure_ascii=False) + \"\\n\")\n    print(f\"\\nğŸ“� æ•°æ�®å·²ä¿�å­˜åˆ°: {filename}\")\n    \n    # æ‰“å�°ç¬¬ä¸€æ�¡ä½œä¸ºéªŒè¯�\n    if data:\n        print(\"\\nğŸ“‹ ç¬¬ä¸€æ�¡æ•°æ�®é¢„è§ˆï¼š\")\n        print(json.dumps(data[0], ensure_ascii=False, indent=2))\n\nif __name__ == \"__main__\":\n    print(\"=\"*60)\n    print(\"æ™ºè�”æ‹›è�˜æ ¡å›­æ‹›è�˜çˆ¬è™«ï¼ˆå…¨è‡ªåŠ¨ç™»å½•+å®Œæ•´å­—æ®µç‰ˆï¼‰\")\n    print(\"=\"*60)\n    print(f\"è´¦å�·: {USERNAME}\")\n    print(f\"ç›®æ ‡: çˆ¬å�–ç¬¬ä¸€é¡µæ‰€æœ‰12ä¸ªå­—æ®µ\")\n    print(\"=\"*60)\n    \n    # çˆ¬å�–ç¬¬ä¸€é¡µ\n    jobs_data = crawl_first_page()\n    \n    # ä¿�å­˜ç»“æ�œ\n    if jobs_data:\n        save_to_jsonl(jobs_data, OUTPUT_FILE)\n        print(f\"\\nğŸ�‰ ä»»åŠ¡å®Œæˆ�ï¼�å…±è�·å�– {len(jobs_data)} æ�¡å®Œæ•´è�Œä½�ä¿¡æ�¯\")\n    else:\n        print(\"\\nâ�Œ æ²¡æœ‰è�·å�–åˆ°ä»»ä½•æ•°æ�®\")",
+        "preview": "import json\nimport time\nimport re\nfrom selenium import webdriver\nfrom selenium.webdriver.common.by import By\nfrom selenium.webdriver.support.ui import WebDriverWait\nfrom selenium.webdriver.support import expected_conditions as EC\nfrom selenium.webdriver.edge.options import Options\nfrom selenium.webdriver.edge.service import Service\nfrom selenium.common.exceptions import TimeoutException, NoSuchElementException\n\n# ========== é…�ç½®åŒº ==========\nEDGE_DRIVER_PATH = r\"D:\\Mine\\Download\\edge download...",
+        "start_line": 1,
+        "end_line": 335
+      },
+      "metadata": {
+        "hash": "4f5ff75d",
+        "encoding": "Windows-1254",
+        "line_count": 335,
+        "truncated": false
+      },
+      "analysis": {
+        "language": "python"
+      }
+    },
+    {
+      "file_info": {
+        "path": "login.py",
+        "name": "login.py",
+        "extension": ".py",
+        "size_bytes": 0,
+        "size_human": "0.00 B",
+        "modified": "2026-03-16T22:13:41.384105",
+        "is_symlink": false
+      },
+      "content": {
+        "raw": "",
+        "preview": "",
+        "start_line": 1,
+        "end_line": 0
+      },
+      "metadata": {
+        "hash": "d41d8cd9",
+        "encoding": "utf-8",
+        "line_count": 0,
+        "truncated": false
+      }
+    }
+  ],
+  "errors": [
+    {
+      "path": ".git",
+      "reason": "excluded_by_pattern"
+    }
+  ]
+}

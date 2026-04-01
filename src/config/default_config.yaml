@@ -1,0 +1,63 @@
+app:
+  name: "Folder2Context"
+  version: "1.0.0"
+  debug: false
+  host: "0.0.0.0"
+  port: 8000
+
+processing:
+  max_file_size_mb: 10
+  max_total_size_mb: 100
+  max_files: 1000
+  timeout_seconds: 300
+  encoding: "auto"
+  exclude_patterns:
+    - ".git"
+    - "__pycache__"
+    - "node_modules"
+    - ".DS_Store"
+    - "*.pyc"
+    - "*.log"
+    - "*.tmp"
+    - "venv"
+    - "env"
+    - ".env"
+    - "dist"
+    - "build"
+    - ".idea"
+    - ".vscode"
+  include_extensions: []
+  exclude_extensions: []
+  follow_symlinks: false
+
+analysis:
+  detect_language: true
+  extract_imports: true
+  extract_classes_functions: true
+  count_tokens: true
+  tokenizer: "cl100k_base"
+  max_line_count: 500
+  truncate_mode: "head_tail"  # head_only, tail_only, head_tail
+  head_lines: 100
+  tail_lines: 50
+
+output:
+  format: "detailed"  # detailed, compact, minimal
+  include_tree: true
+  include_metadata: true
+  include_statistics: true
+  include_errors: true
+  compress_output: false
+  chunk_by_tokens: false
+  max_tokens_per_chunk: 10000
+
+cache:
+  enabled: true
+  ttl_hours: 24
+  max_size_mb: 500
+  storage_path: "./cache"
+
+tasks:
+  cleanup_interval_minutes: 30
+  task_expiry_hours: 24
+  storage_path: "./tasks"

@@ -1,0 +1,330 @@
+{
+  "metadata": {
+    "project_name": "software",
+    "root_path": "D:\\Mine\\Project\\vscodefile\\Software\\software",
+    "processed_at": "2026-03-27T17:21:03.072312",
+    "version": "1.0.0",
+    "ai_description": "你好，这是一个【software】项目，请你来解析这个项目。\n\n项目概览：\n- 项目名称：software\n- 文件总数：17 个\n- 项目大小：125.38 KB\n- 支持格式：TXT、MD、DOCX、PDF\n- 主要文件类型：.py (16个)、.jsonl (1个)\n\n请帮我分析这个项目的文档结构、主要内容和使用说明。\n以下是项目的完整结构和文档内容："
+  },
+  "statistics": {
+    "total_files": 17,
+    "total_size_bytes": 128384,
+    "total_size_human": "125.38 KB",
+    "skipped_files": 1,
+    "file_types": {
+      ".py": 16,
+      ".jsonl": 1
+    },
+    "success_count": 0,
+    "failed_count": 17,
+    "total_processed": 17
+  },
+  "files": [
+    {
+      "file_info": {
+        "path": "bin\\crawler2-json.py",
+        "name": "crawler2-json.py",
+        "extension": ".py",
+        "size_bytes": 8183,
+        "size_human": "7.99 KB",
+        "modified": "2026-03-17T16:55:43.702082"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "bin\\crawler2-multi.py",
+        "name": "crawler2-multi.py",
+        "extension": ".py",
+        "size_bytes": 4372,
+        "size_human": "4.27 KB",
+        "modified": "2026-03-17T14:46:52.270060"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "bin\\crawler2.py",
+        "name": "crawler2.py",
+        "extension": ".py",
+        "size_bytes": 2661,
+        "size_human": "2.60 KB",
+        "modified": "2026-03-17T14:36:08.969709"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "bin\\news_crawler.py",
+        "name": "news_crawler.py",
+        "extension": ".py",
+        "size_bytes": 8183,
+        "size_human": "7.99 KB",
+        "modified": "2026-03-17T16:55:43.702082"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "crawler.py",
+        "name": "crawler.py",
+        "extension": ".py",
+        "size_bytes": 9214,
+        "size_human": "9.00 KB",
+        "modified": "2026-03-17T20:36:35.022594"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "crawler_news.py",
+        "name": "crawler_news.py",
+        "extension": ".py",
+        "size_bytes": 12005,
+        "size_human": "11.72 KB",
+        "modified": "2026-03-26T22:58:52.399850"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "crawler_news2.py",
+        "name": "crawler_news2.py",
+        "extension": ".py",
+        "size_bytes": 13403,
+        "size_human": "13.09 KB",
+        "modified": "2026-03-26T23:27:46.046281"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "crawler_test.py",
+        "name": "crawler_test.py",
+        "extension": ".py",
+        "size_bytes": 13215,
+        "size_human": "12.91 KB",
+        "modified": "2026-03-17T21:01:23.097957"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "file\\file_reader.py",
+        "name": "file_reader.py",
+        "extension": ".py",
+        "size_bytes": 12393,
+        "size_human": "12.10 KB",
+        "modified": "2026-03-27T16:37:11.032495"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "file\\output.jsonl",
+        "name": "output.jsonl",
+        "extension": ".jsonl",
+        "size_bytes": 23249,
+        "size_human": "22.70 KB",
+        "modified": "2026-03-27T16:37:48.196014"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .jsonl]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".jsonl"
+      }
+    },
+    {
+      "file_info": {
+        "path": "file\\test-docx.py",
+        "name": "test-docx.py",
+        "extension": ".py",
+        "size_bytes": 509,
+        "size_human": "509.00 B",
+        "modified": "2026-03-27T11:46:08.651040"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "file\\test-pdf.py",
+        "name": "test-pdf.py",
+        "extension": ".py",
+        "size_bytes": 468,
+        "size_human": "468.00 B",
+        "modified": "2026-03-27T11:42:59.931642"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "file\\test-plus.py",
+        "name": "test-plus.py",
+        "extension": ".py",
+        "size_bytes": 12087,
+        "size_human": "11.80 KB",
+        "modified": "2026-03-27T12:03:47.787619"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "file\\test.py",
+        "name": "test.py",
+        "extension": ".py",
+        "size_bytes": 1954,
+        "size_human": "1.91 KB",
+        "modified": "2026-03-27T11:48:39.663150"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "login.py",
+        "name": "login.py",
+        "extension": ".py",
+        "size_bytes": 0,
+        "size_human": "0.00 B",
+        "modified": "2026-03-16T22:13:41.384105"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "test.py",
+        "name": "test.py",
+        "extension": ".py",
+        "size_bytes": 1808,
+        "size_human": "1.77 KB",
+        "modified": "2026-03-27T10:54:36.503178"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    },
+    {
+      "file_info": {
+        "path": "test_schema.py",
+        "name": "test_schema.py",
+        "extension": ".py",
+        "size_bytes": 4680,
+        "size_human": "4.57 KB",
+        "modified": "2026-03-27T10:40:46.056767"
+      },
+      "content": {
+        "raw": "[不支持的文件类型: .py]",
+        "truncated": false
+      },
+      "metadata": {
+        "unsupported": true,
+        "extension": ".py"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+pyyaml
+chardet
+pydantic
+aiofiles
+tiktoken
+python-docx
+PyMuPDF

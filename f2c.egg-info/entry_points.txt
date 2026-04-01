@@ -1,0 +1,2 @@
+[console_scripts]
+f2c = src.main:main

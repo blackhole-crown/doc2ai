@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder2Context - AI 友好的文件夹分析工具</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="app">
+        <!-- 头部 -->
+        <el-header>
+            <div class="header-container">
+                <h1>
+                    <i class="el-icon-folder-opened"></i>
+                    Folder2Context
+                    <span class="subtitle">让 AI 轻松理解你的项目结构</span>
+                </h1>
+                <div class="header-actions">
+                    <el-button type="text" @click="showConfig = true">
+                        <i class="el-icon-setting"></i> 配置
+                    </el-button>
+                    <el-button type="text" @click="showHelp = true">
+                        <i class="el-icon-question"></i> 帮助
+                    </el-button>
+                </div>
+            </div>
+        </el-header>
+
+        <el-main>
+            <!-- 主要操作区 -->
+            <el-row :gutter="20">
+                <!-- 左侧：输入区 -->
+                <el-col :span="12">
+                    <el-card class="input-card">
+                        <div slot="header">
+                            <span><i class="el-icon-upload"></i> 选择项目</span>
+                        </div>
+                        
+                        <!-- 上传方式切换 -->
+                        <el-radio-group v-model="inputMethod" style="margin-bottom: 20px;">
+                            <el-radio-button label="path">本地路径</el-radio-button>
+                            <el-radio-button label="upload">上传压缩包</el-radio-button>
+                        </el-radio-group>
+
+                        <!-- 本地路径输入 -->
+                        <div v-if="inputMethod === 'path'">
+                            <el-input
+                                v-model="folderPath"
+                                placeholder="请输入文件夹路径，例如：D:/Projects/myapp"
+                                clearable>
+                                <el-button slot="append" icon="el-icon-search" @click="previewFolder">预览</el-button>
+                            </el-input>
+                            <div class="path-tips">
+                                <i class="el-icon-info"></i> 
+                                支持绝对路径和相对路径，可以使用 / 或 \\
+                            </div>
+                        </div>
+
+                        <!-- 文件上传 -->
+                        <div v-else>
+                            <el-upload
+                                class="upload-area"
+                                drag
+                                :action="uploadUrl"
+                                :on-success="handleUploadSuccess"
+                                :on-error="handleUploadError"
+                                :before-upload="beforeUpload"
+                                :file-list="fileList">
+                                <i class="el-icon-upload"></i>
+                                <div class="el-upload__text">将压缩包拖到此处，或<em>点击上传</em></div>
+                                <div class="el-upload__tip" slot="tip">
+                                    支持 .zip, .tar, .tar.gz 格式，最大 500MB
+                                </div>
+                            </el-upload>
+                            
+                            <!-- 上传任务状态 -->
+                            <div v-if="uploadTaskId" class="upload-status">
+                                <el-progress 
+                                    :percentage="uploadProgress" 
+                                    :status="uploadStatus"
+                                    :format="formatProgress">
+                                </el-progress>
+                                <div class="status-message">{{ uploadMessage }}</div>
+                            </div>
+                        </div>
+
+                        <!-- 处理按钮 -->
+                        <div class="action-buttons">
+                            <el-button 
+                                type="primary" 
+                                :loading="processing"
+                                @click="processFolder"
+                                :disabled="!canProcess">
+                                <i class="el-icon-cpu"></i> 
+                                {{ processing ? '处理中...' : '开始处理' }}
+                            </el-button>
+                            
+                            <el-button 
+                                v-if="result"
+                                type="success" 
+                                @click="downloadResult">
+                                <i class="el-icon-download"></i> 下载结果
+                            </el-button>
+                        </div>
+                    </el-card>
+                </el-col>
+
+                <!-- 右侧：预览区 -->
+                <el-col :span="12">
+                    <el-card class="preview-card">
+                        <div slot="header">
+                            <span><i class="el-icon-view"></i> 项目预览</span>
+                            <el-button 
+                                v-if="previewTree" 
+                                type="text" 
+                                size="small" 
+                                @click="clearPreview"
+                                style="float: right;">
+                                清空
+                            </el-button>
+                        </div>
+                        
+                        <div v-if="previewTree" class="preview-content">
+                            <el-tree
+                                :data="[previewTree]"
+                                :props="treeProps"
+                                node-key="path"
+                                :expand-on-click-node="false"
+                                :default-expanded-keys="defaultExpandedKeys">
+                                <span class="custom-tree-node" slot-scope="{ node, data }">
+                                    <i :class="data.type === 'directory' ? 'el-icon-folder' : 'el-icon-document'"></i>
+                                    <span class="node-name">{{ node.label }}</span>
+                                    <span v-if="data.type === 'file'" class="node-size">{{ data.size_human }}</span>
+                                </span>
+                            </el-tree>
+                        </div>
+                        <div v-else class="preview-placeholder">
+                            <i class="el-icon-folder-opened"></i>
+                            <p>输入路径后点击「预览」查看项目结构</p>
+                            <p class="tip">或上传压缩包自动预览</p>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+
+            <!-- 处理结果展示 -->
+            <el-card v-if="result" class="result-card">
+                <div slot="header">
+                    <span><i class="el-icon-data-analysis"></i> 处理结果</span>
+                    <el-button type="text" size="small" @click="showRawJson = !showRawJson">
+                        {{ showRawJson ? '显示统计' : '显示原始 JSON' }}
+                    </el-button>
+                </div>
+                
+                <!-- 统计信息 -->
+                <div v-if="!showRawJson" class="stats-content">
+                    <el-row :gutter="20">
+                        <el-col :span="8">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ result.statistics.total_files }}</div>
+                                <div class="stat-label">文件总数</div>
+                            </div>
+                        </el-col>
+                        <el-col :span="8">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ result.statistics.total_size_human }}</div>
+                                <div class="stat-label">总大小</div>
+                            </div>
+                        </el-col>
+                        <el-col :span="8">
+                            <div class="stat-card">
+                                <div class="stat-number">{{ result.statistics.skipped_files || 0 }}</div>
+                                <div class="stat-label">跳过文件</div>
+                            </div>
+                        </el-col>
+                    </el-row>
+                    
+                    <div class="file-types">
+                        <h4>文件类型分布</h4>
+                        <div class="type-tags">
+                            <el-tag 
+                                v-for="(count, ext) in result.statistics.file_types" 
+                                :key="ext"
+                                size="medium"
+                                style="margin: 5px;">
+                                {{ ext || '无扩展名' }}: {{ count }}
+                            </el-tag>
+                        </div>
+                    </div>
+                    
+                    <div class="project-tree">
+                        <h4>项目结构</h4>
+                        <el-tree
+                            :data="[result.tree]"
+                            :props="treeProps"
+                            node-key="path"
+                            :expand-on-click-node="false">
+                            <span class="custom-tree-node" slot-scope="{ node, data }">
+                                <i :class="data.type === 'directory' ? 'el-icon-folder' : 'el-icon-document'"></i>
+                                <span class="node-name">{{ node.label }}</span>
+                            </span>
+                        </el-tree>
+                    </div>
+                </div>
+                
+                <!-- 原始 JSON -->
+                <div v-else class="json-content">
+                    <pre>{{ JSON.stringify(result, null, 2) }}</pre>
+                </div>
+            </el-card>
+        </el-main>
+
+        <!-- 配置对话框 -->
+        <el-dialog title="配置选项" :visible.sync="showConfig" width="600px">
+            <el-form :model="config" label-width="140px">
+                <el-form-item label="最大文件大小 (MB)">
+                    <el-input-number v-model="config.processing.max_file_size_mb" :min="1" :max="100"></el-input-number>
+                </el-form-item>
+                <el-form-item label="最大文件行数">
+                    <el-input-number v-model="config.analysis.max_line_count" :min="10" :max="10000"></el-input-number>
+                </el-form-item>
+                <el-form-item label="截断模式">
+                    <el-select v-model="config.analysis.truncate_mode">
+                        <el-option label="保留头尾" value="head_tail"></el-option>
+                        <el-option label="仅保留开头" value="head_only"></el-option>
+                        <el-option label="仅保留结尾" value="tail_only"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="排除模式">
+                    <el-input
+                        type="textarea"
+                        :rows="3"
+                        v-model="excludePatternsText"
+                        placeholder="每行一个排除模式，例如：.git&#10;__pycache__&#10;*.log">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="输出格式">
+                    <el-radio-group v-model="config.output.format">
+                        <el-radio label="detailed">详细格式</el-radio>
+                        <el-radio label="compact">紧凑格式</el-radio>
+                        <el-radio label="minimal">最简格式</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-form>
+            <span slot="footer">
+                <el-button @click="showConfig = false">取消</el-button>
+                <el-button type="primary" @click="saveConfig">保存配置</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 帮助对话框 -->
+        <el-dialog title="使用帮助" :visible.sync="showHelp" width="500px">
+            <div class="help-content">
+                <h4>本地路径模式</h4>
+                <p>输入服务器上已有的文件夹路径，点击「预览」查看结构，点击「开始处理」进行分析。</p>
+                
+                <h4>上传压缩包模式</h4>
+                <p>上传项目的 ZIP 或 TAR 压缩包，系统会自动解压并分析。</p>
+                
+                <h4>输出格式</h4>
+                <ul>
+                    <li><strong>详细格式</strong>：包含完整的元数据、目录树和文件内容</li>
+                    <li><strong>紧凑格式</strong>：精简输出，适合大型项目</li>
+                    <li><strong>最简格式</strong>：只包含文件路径和内容</li>
+                </ul>
+                
+                <h4>排除模式</h4>
+                <p>支持通配符，例如：<code>*.log</code>、<code>__pycache__</code>、<code>.git</code></p>
+            </div>
+        </el-dialog>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
