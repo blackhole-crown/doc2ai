@@ -1,4 +1,4 @@
-"""PPTX 文件读取器 - 带 OCR 支持"""
+"""PPTX 文件读取器 - 带 OCR 支持（配置化版本）"""
 
 import os
 import tempfile
@@ -16,16 +16,6 @@ except ImportError:
 
 try:
     import pytesseract
-    # 设置 Tesseract 路径
-    pytesseract.pytesseract.tesseract_cmd = r'D:\Mine\Tools\tesseract\tesseract.exe'
-    # 设置 tessdata 路径
-    import subprocess
-    # 测试是否可用
-    try:
-        pytesseract.get_tesseract_version()
-        print("Tesseract 初始化成功")
-    except:
-        pass
 except ImportError:
     pytesseract = None
 
@@ -42,6 +32,18 @@ class PptxSimpleReader:
             'ocr_failed': 0,
             'error': None
         }
+        
+        # 从配置读取 Tesseract 路径
+        self.tesseract_cmd = self.config.get('tesseract_cmd')
+        self.tessdata_dir = self.config.get('tessdata_dir')
+        
+        # 如果提供了路径，则配置 pytesseract
+        if self.tesseract_cmd and pytesseract:
+            pytesseract.pytesseract.tesseract_cmd = self.tesseract_cmd
+        
+        # 设置环境变量
+        if self.tessdata_dir:
+            os.environ['TESSDATA_PREFIX'] = self.tessdata_dir
     
     def _preprocess_image(self, img):
         """预处理图片，提高 OCR 识别率"""
@@ -60,33 +62,20 @@ class PptxSimpleReader:
     
     def _ocr_image(self, img_path):
         """对单张图片进行 OCR"""
+        if not pytesseract:
+            return None
+            
         try:
             img = Image.open(img_path)
             
             # 预处理
             img = self._preprocess_image(img)
             
-            # 设置环境变量
-            import os
-            os.environ['TESSDATA_PREFIX'] = r'D:\Mine\Tools\tesseract\tessdata'
+            # 使用 pytesseract 进行 OCR
+            lang = self.config.get('ocr_lang', 'chi_sim+eng')
+            text = pytesseract.image_to_string(img, lang=lang)
             
-            # 使用 subprocess 调用（更可靠）
-            tesseract_path = r'D:\Mine\Tools\tesseract\tesseract.exe'
-            tessdata_dir = r'D:\Mine\Tools\tesseract\tessdata'
-            
-            # 保存临时文件
-            temp_img = img_path + '_processed.png'
-            img.save(temp_img)
-            
-            # 调用 tesseract
-            cmd = [tesseract_path, temp_img, 'stdout', '-l', 'chi_sim+eng', '--tessdata-dir', tessdata_dir]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            
-            # 清理临时文件
-            if os.path.exists(temp_img):
-                os.remove(temp_img)
-            
-            return result.stdout.strip()
+            return text.strip()
             
         except Exception as e:
             print(f"    OCR 失败: {e}")
@@ -103,6 +92,8 @@ class PptxSimpleReader:
         if pytesseract is None:
             self.metadata['error'] = 'pytesseract_not_installed'
             print("错误: pytesseract 未安装，请运行: pip install pytesseract")
+            if self.tesseract_cmd:
+                print(f"提示: 已配置 Tesseract 路径: {self.tesseract_cmd}")
             return None
         
         if Image is None:

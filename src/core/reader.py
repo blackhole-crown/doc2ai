@@ -6,14 +6,13 @@ from typing import List, Dict, Any
 from src.formats.text import TextReader
 from src.formats.docx import DocxReader
 from src.formats.pdf import PdfReader
-from src.formats.pptx import PptxReader
-from src.formats.pptx_ocr import PptxOcrReader  # 添加这行导入
+from src.formats.pptx_ocr import PptxOcrReader
 
 
 class DocumentReader:
     """统一文档读取器"""
     
-    # 格式映射 - 所有文本格式都使用 TextReader
+    # 格式映射
     READERS = {
         # 代码文件
         '.py': TextReader,
@@ -62,8 +61,8 @@ class DocumentReader:
         # 办公文档（专用解析器）
         '.docx': DocxReader,
         '.pdf': PdfReader,
-        '.pptx': PptxOcrReader,  # 使用带 OCR 的版本
-        '.ppt': PptxOcrReader,   # 旧版 PPT 也使用 OCR
+        '.pptx': PptxOcrReader,
+        '.ppt': PptxOcrReader,
     }
     
     def __init__(self, config: Dict = None):
@@ -86,46 +85,16 @@ class DocumentReader:
             if (i + 1) % 10 == 0 or i == total - 1:
                 print(f"   进度: {i + 1}/{total}")
             
-            # 选择读取器
-            reader_class = self.READERS.get(ext)
+            # 读取单个文件
+            content_info = self._read_single_file(file_info.absolute_path, ext)
             
-            if reader_class:
-                try:
-                    reader = reader_class(self.config)
-                    content = reader.read(file_info.absolute_path)
-                    
-                    if content:
-                        results[file_info.path] = {
-                            'content': content,
-                            'metadata': reader.get_metadata()
-                        }
-                        self.success_count += 1
-                    else:
-                        # 空文件或读取失败
-                        if file_info.size_bytes == 0:
-                            results[file_info.path] = {
-                                'content': f"[空文件: {file_info.name}]",
-                                'metadata': {'empty': True, 'error': True}
-                            }
-                        else:
-                            results[file_info.path] = {
-                                'content': f"[读取失败: {file_info.name}]",
-                                'metadata': {'error': True}
-                            }
-                        self.failed_count += 1
-                        
-                except Exception as e:
-                    results[file_info.path] = {
-                        'content': f"[错误: {str(e)}]",
-                        'metadata': {'error': True}
-                    }
+            if content_info.get('content') or content_info.get('metadata', {}).get('error'):
+                results[file_info.path] = content_info
+                if content_info.get('metadata', {}).get('error'):
                     self.failed_count += 1
+                else:
+                    self.success_count += 1
             else:
-                # 不支持的类型
-                results[file_info.path] = {
-                    'content': f"[不支持的类型: {ext}]",
-                    'metadata': {'unsupported': True, 'extension': ext}
-                }
                 self.failed_count += 1
         
         print(f"\n   读取完成: 成功 {self.success_count} 个, 失败 {self.failed_count} 个")
@@ -135,16 +104,27 @@ class DocumentReader:
     def read_single(self, file_path: str) -> Dict[str, Any]:
         """读取单个文件"""
         path = Path(file_path)
-        ext = path.suffix.lower()
         
         if not path.exists():
-            return {'content': None, 'metadata': {'error': 'file_not_found'}}
-        
-        # 检查空文件
-        if path.stat().st_size == 0:
             return {
-                'content': f"[空文件: {path.name}]",
-                'metadata': {'empty': True, 'size': 0}
+                'content': None,
+                'metadata': {'error': 'file_not_found'}
+            }
+        
+        ext = path.suffix.lower()
+        return self._read_single_file(path, ext)
+    
+    def _read_single_file(self, file_path: Path, ext: str) -> Dict[str, Any]:
+        """内部方法：读取单个文件"""
+        # 检查空文件
+        if file_path.stat().st_size == 0:
+            return {
+                'content': None,
+                'metadata': {
+                    'empty': True,
+                    'size': 0,
+                    'error': 'empty_file'
+                }
             }
         
         reader_class = self.READERS.get(ext)
@@ -152,20 +132,34 @@ class DocumentReader:
         if reader_class:
             try:
                 reader = reader_class(self.config)
-                content = reader.read(path)
-                return {
-                    'content': content,
-                    'metadata': reader.get_metadata()
-                }
+                content = reader.read(file_path)
+                
+                if content is not None:
+                    return {
+                        'content': content,
+                        'metadata': reader.get_metadata()
+                    }
+                else:
+                    # 读取失败（但可能是格式问题）
+                    return {
+                        'content': None,
+                        'metadata': reader.get_metadata()
+                    }
             except Exception as e:
                 return {
                     'content': None,
-                    'metadata': {'error': str(e)}
+                    'metadata': {
+                        'error': str(e),
+                        'exception': True
+                    }
                 }
         else:
             return {
                 'content': None,
-                'metadata': {'unsupported': True, 'extension': ext}
+                'metadata': {
+                    'unsupported': True,
+                    'extension': ext
+                }
             }
     
     def get_statistics(self):

@@ -1,4 +1,4 @@
-"""PPTX 文件读取器 - 带 OCR 支持"""
+"""PPTX 文件读取器 - 带 OCR 支持（改进临时文件清理）"""
 
 import os
 import tempfile
@@ -33,6 +33,33 @@ class PptxOcrReader:
         }
         self.use_ocr = config.get('use_ocr', True)
         self.ocr_lang = config.get('ocr_lang', 'chi_sim+eng')
+        
+        # 配置 Tesseract 路径
+        tesseract_cmd = config.get('tesseract_cmd')
+        if tesseract_cmd and pytesseract:
+            pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+    
+    def _ocr_image(self, img_path):
+        """对单张图片进行 OCR，确保临时文件清理"""
+        temp_img = None
+        try:
+            if not self.use_ocr or not pytesseract or not Image:
+                return None
+            
+            img = Image.open(img_path)
+            
+            # 简单预处理
+            if img.mode != 'L':
+                img = img.convert('L')
+            
+            # 使用 pytesseract 识别
+            text = pytesseract.image_to_string(img, lang=self.ocr_lang)
+            
+            return text.strip()
+            
+        except Exception as e:
+            print(f"    OCR 失败: {e}")
+            return None
     
     def read(self, file_path):
         """读取 PPTX 文件，提取文本和图片 OCR"""
@@ -54,6 +81,7 @@ class PptxOcrReader:
         text_parts = []
         ocr_success = 0
         ocr_failed = 0
+        temp_dir = None
         
         try:
             # 打开 PPT
@@ -62,7 +90,8 @@ class PptxOcrReader:
             print(f"PPT 总页数: {total_slides}")
             
             # 创建临时目录
-            temp_dir = tempfile.mkdtemp()
+            if self.use_ocr:
+                temp_dir = tempfile.mkdtemp()
             
             # 提取文本和图片
             for slide_num, slide in enumerate(prs.slides, 1):
@@ -74,42 +103,36 @@ class PptxOcrReader:
                         text = shape.text.strip()
                         if text:
                             slide_texts.append(text)
-                
-                # 2. 尝试提取图片并 OCR
-                if self.use_ocr:
-                    try:
-                        # 检查是否是图片形状
-                        if hasattr(shape, "image") and shape.image:
+                    
+                    # 2. 尝试提取图片并 OCR
+                    if self.use_ocr and hasattr(shape, "image") and shape.image:
+                        try:
                             image_blob = shape.image.blob
-                            img_temp = os.path.join(temp_dir, f"slide_{slide_num}_img.png")
-                            with open(img_temp, 'wb') as f:
-                                f.write(image_blob)
-                            
-                            # OCR 识别
-                            try:
-                                img = Image.open(img_temp)
-                                text = pytesseract.image_to_string(img, lang=self.ocr_lang)
+                            if image_blob:
+                                img_temp = os.path.join(temp_dir, f"slide_{slide_num}_img_{hash(image_blob)}.png")
+                                with open(img_temp, 'wb') as f:
+                                    f.write(image_blob)
+                                
+                                # OCR 识别
+                                text = self._ocr_image(img_temp)
                                 if text and text.strip():
                                     slide_texts.append(f"[图片识别] {text.strip()}")
                                     ocr_success += 1
-                            except Exception as e:
-                                ocr_failed += 1
-                            finally:
+                                else:
+                                    ocr_failed += 1
+                                
+                                # 立即删除临时文件
                                 if os.path.exists(img_temp):
                                     os.remove(img_temp)
-                    except Exception as e:
-                        # 不是图片形状或处理失败，跳过
-                        pass
+                                    
+                        except Exception as e:
+                            ocr_failed += 1
                 
                 # 记录这一页
                 if slide_texts:
                     text_parts.append(f"=== 第 {slide_num} 页 ===")
                     text_parts.extend(slide_texts)
                     text_parts.append("")
-            
-            # 清理临时目录
-            import shutil
-            shutil.rmtree(temp_dir, ignore_errors=True)
             
             if not text_parts:
                 self.metadata['error'] = 'no_content'
@@ -138,6 +161,11 @@ class PptxOcrReader:
             import traceback
             traceback.print_exc()
             return None
+        finally:
+            # 清理临时目录
+            if temp_dir and os.path.exists(temp_dir):
+                import shutil
+                shutil.rmtree(temp_dir, ignore_errors=True)
     
     def get_metadata(self):
         return self.metadata
