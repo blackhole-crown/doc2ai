@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# Project specific
+data/
+output.json
+output.jsonl
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
