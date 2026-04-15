@@ -1,6 +1,6 @@
 """JSON 格式输出器"""
 
-from pathlib import Path  # 移到文件开头
+from pathlib import Path
 from typing import List, Dict, Any
 from datetime import datetime
 
@@ -12,32 +12,23 @@ class JSONFormatter:
         self.config = config or {}
         self.compact = config.get('compact', False)
     
-    def format(self, files: List, contents: Dict, stats: Dict, 
+    def format(self, files: List, contents: Dict[int, Any], stats: Dict,
                root_path: str, description: str = None) -> Dict[str, Any]:
         """格式化输出为 JSON"""
         
-        # 构建文件列表
+        # 构建文件列表（按 ID 排序）
         files_list = []
-        for file_info in files:
-            content_info = contents.get(file_info.path, {})
+        failed_file_ids = []
+        error_types = {}
+        
+        for file_id in sorted(contents.keys()):
+            item = contents[file_id]
+            files_list.append(item)
             
-            file_data = {
-                "file_info": {
-                    "path": file_info.path,
-                    "name": file_info.name,
-                    "extension": file_info.extension,
-                    "size_bytes": file_info.size_bytes,
-                    "size_human": self._format_size(file_info.size_bytes),
-                    "modified": file_info.modified.isoformat()
-                },
-                "content": {
-                    "raw": content_info.get('content', ''),
-                    "truncated": False
-                },
-                "metadata": content_info.get('metadata', {})
-            }
-            
-            files_list.append(file_data)
+            if item.get('status') == 'failed':
+                failed_file_ids.append(file_id)
+                error_type = item.get('metadata', {}).get('error', 'unknown')
+                error_types[error_type] = error_types.get(error_type, 0) + 1
         
         # 构建输出
         output = {
@@ -47,7 +38,11 @@ class JSONFormatter:
                 "processed_at": datetime.now().isoformat(),
                 "version": "1.0.0"
             },
-            "statistics": stats,
+            "statistics": {
+                **stats,
+                "failed_file_ids": failed_file_ids,
+                "error_types": error_types
+            },
             "files": files_list
         }
         

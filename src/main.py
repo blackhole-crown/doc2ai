@@ -102,7 +102,7 @@ def process_folder(folder_path, args):
     # 2. 读取文件内容
     print(f"\n⏳ 读取文件内容...")
     reader = DocumentReader(config)
-    contents = reader.read_all(files)
+    contents = reader.read_all(files)  # 返回 Dict[int, Any]
     
     # 更新统计
     stats.update(reader.get_statistics())

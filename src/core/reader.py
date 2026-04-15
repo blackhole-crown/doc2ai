@@ -12,14 +12,17 @@ from src.formats.pptx_ocr import PptxOcrReader
 class DocumentReader:
     """统一文档读取器"""
     
-    # 格式映射
+    # 格式映射 - 所有文本格式都使用 TextReader
     READERS = {
         # 代码文件
         '.py': TextReader,
         '.js': TextReader,
-        '.ts': TextReader,
-        '.jsx': TextReader,
-        '.tsx': TextReader,
+        '.ts': TextReader,        # TypeScript
+        '.jsx': TextReader,       # React JSX
+        '.tsx': TextReader,       # React TSX
+        '.vue': TextReader,       # Vue 组件
+        '.svelte': TextReader,    # Svelte 组件
+        '.astro': TextReader,     # Astro 组件
         '.java': TextReader,
         '.c': TextReader,
         '.cpp': TextReader,
@@ -44,12 +47,17 @@ class DocumentReader:
         '.rst': TextReader,
         '.log': TextReader,
         
-        # 数据文件
+        # 样式文件
+        '.css': TextReader,
+        '.scss': TextReader,      # SCSS
+        '.sass': TextReader,      # Sass
+        '.less': TextReader,      # Less
+        '.styl': TextReader,      # Stylus
+        
+        # 数据/模板文件
         '.csv': TextReader,
         '.xml': TextReader,
         '.html': TextReader,
-        '.css': TextReader,
-        '.scss': TextReader,
         
         # 脚本文件
         '.sh': TextReader,
@@ -57,6 +65,10 @@ class DocumentReader:
         '.bat': TextReader,
         '.ps1': TextReader,
         '.sql': TextReader,
+        
+        # GraphQL
+        '.graphql': TextReader,
+        '.gql': TextReader,
         
         # 办公文档（专用解析器）
         '.docx': DocxReader,
@@ -69,12 +81,17 @@ class DocumentReader:
         self.config = config or {}
         self.success_count = 0
         self.failed_count = 0
+        self._failed_file_ids = []  # 新增：记录失败的文件 ID
     
-    def read_all(self, files: List) -> Dict[str, Any]:
-        """读取所有文件内容"""
+    def read_all(self, files: List) -> Dict[int, Any]:
+        """
+        读取所有文件内容
+        返回: {file_id: content_dict}
+        """
         results = {}
         self.success_count = 0
         self.failed_count = 0
+        self._failed_file_ids = []
         
         total = len(files)
         
@@ -88,21 +105,36 @@ class DocumentReader:
             # 读取单个文件
             content_info = self._read_single_file(file_info.absolute_path, ext)
             
-            if content_info.get('content') or content_info.get('metadata', {}).get('error'):
-                results[file_info.path] = content_info
-                if content_info.get('metadata', {}).get('error'):
-                    self.failed_count += 1
-                else:
-                    self.success_count += 1
-            else:
+            # 使用 file_info.id 作为 key
+            results[file_info.id] = {
+                'file_id': file_info.id,
+                'file_info': {
+                    'path': file_info.path,
+                    'name': file_info.name,
+                    'extension': file_info.extension,
+                    'size_bytes': file_info.size_bytes,
+                    'size_human': self._format_size(file_info.size_bytes),
+                    'modified': file_info.modified.isoformat()
+                },
+                'content': content_info.get('content', ''),
+                'metadata': content_info.get('metadata', {})
+            }
+            
+            # 判断是否成功
+            if content_info.get('metadata', {}).get('error'):
                 self.failed_count += 1
+                self._failed_file_ids.append(file_info.id)
+                results[file_info.id]['status'] = 'failed'
+            else:
+                self.success_count += 1
+                results[file_info.id]['status'] = 'success'
         
         print(f"\n   读取完成: 成功 {self.success_count} 个, 失败 {self.failed_count} 个")
         
         return results
     
     def read_single(self, file_path: str) -> Dict[str, Any]:
-        """读取单个文件"""
+        """读取单个文件（不包含 ID）"""
         path = Path(file_path)
         
         if not path.exists():
@@ -140,17 +172,16 @@ class DocumentReader:
                         'metadata': reader.get_metadata()
                     }
                 else:
-                    # 读取失败（但可能是格式问题）
                     return {
                         'content': None,
-                        'metadata': reader.get_metadata()
+                        'metadata': reader.get_metadata() if reader.get_metadata() else {'error': 'read_failed'}
                     }
             except Exception as e:
                 return {
                     'content': None,
                     'metadata': {
                         'error': str(e),
-                        'exception': True
+                        'error_type': 'exception'
                     }
                 }
         else:
@@ -158,12 +189,23 @@ class DocumentReader:
                 'content': None,
                 'metadata': {
                     'unsupported': True,
-                    'extension': ext
+                    'extension': ext,
+                    'error': 'unsupported_format'
                 }
             }
     
     def get_statistics(self):
         return {
             'success_count': self.success_count,
-            'failed_count': self.failed_count
+            'failed_count': self.failed_count,
+            'failed_file_ids': self._failed_file_ids
         }
+    
+    @staticmethod
+    def _format_size(size_bytes: int) -> str:
+        """格式化文件大小"""
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size_bytes < 1024.0:
+                return f"{size_bytes:.2f} {unit}"
+            size_bytes /= 1024.0
+        return f"{size_bytes:.2f} TB"
