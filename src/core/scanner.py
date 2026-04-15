@@ -4,13 +4,14 @@ import os
 import fnmatch
 from pathlib import Path
 from typing import List, Dict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
 @dataclass
 class FileInfo:
     """文件信息数据类"""
+    id: int  # 新增：文件 ID
     path: str
     name: str
     absolute_path: Path
@@ -33,6 +34,7 @@ class FolderScanner:
         self.scanned_files: List[FileInfo] = []
         self.skipped_files: List[Dict] = []
         self.total_size = 0
+        self._next_id = 1  # 新增：自增 ID
     
     def scan(self, root_path: str) -> List[FileInfo]:
         """扫描文件夹"""
@@ -47,6 +49,7 @@ class FolderScanner:
         self.scanned_files = []
         self.skipped_files = []
         self.total_size = 0
+        self._next_id = 1  # 重置 ID
         
         self._walk_directory(root_path, root_path)
         
@@ -118,6 +121,7 @@ class FolderScanner:
                 return
             
             file_info = FileInfo(
+                id=self._next_id,  # 分配 ID
                 path=str(rel_path),
                 name=file_path.name,
                 absolute_path=file_path,
@@ -129,6 +133,7 @@ class FolderScanner:
             
             self.scanned_files.append(file_info)
             self.total_size += file_size
+            self._next_id += 1  # ID 自增
             
         except Exception as e:
             self.skipped_files.append({
